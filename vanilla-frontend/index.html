@@ -3,139 +3,828 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart AI Hotel Management</title>
-    <!-- Google Fonts -->
+    <title>Aidenh Apartments - Guest Portal</title>
+    <!-- Paystack & jsPDF Libraries -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Firebase SDKs for Auth & DB Integration -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Ionicons -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --hotel-dark: #1e1b4b;
+            --hotel-primary: #4f46e5;
+            --hotel-accent: #818cf8;
+            --bg-color: #f8fafc;
+            --text-main: #334155;
+        }
+        
+        body { 
+            margin: 0; padding: 0; font-family: 'Outfit', sans-serif; 
+            background: url('BG.webp') center center / cover no-repeat fixed; 
+            color: var(--text-main); 
+        }
+        
+        .hero {
+            height: 60vh;
+            background: rgba(30, 27, 75, 0.6);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        .hero h1 { font-size: 56px; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+        .hero p { font-size: 22px; max-width: 600px; margin-bottom: 40px; color: #e0e7ff; text-shadow: 1px 1px 5px rgba(0,0,0,0.5); }
+
+        .tabs-wrapper {
+            max-width: 1200px; margin: -35px auto 30px auto; display: flex; justify-content: center;
+            gap: 10px; flex-wrap: wrap; padding: 0 20px; z-index: 10; position: relative;
+        }
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.9); border: 2px solid #e2e8f0; padding: 12px 25px; border-radius: 30px; font-size: 16px;
+            font-weight: bold; color: var(--hotel-dark); cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Outfit'; flex: 1; min-width: 120px; max-width: 250px;
+            backdrop-filter: blur(5px);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--hotel-primary), var(--hotel-accent)); color: white; border-color: transparent;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4);
+        }
+        .tab-btn:hover:not(.active) { transform: translateY(-3px); border-color: var(--hotel-primary); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .booking-widget {
+            background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 20px; display: flex; gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); max-width: 1000px; margin: 20px auto 40px auto; flex-wrap: wrap; text-align: left;
+            backdrop-filter: blur(10px);
+        }
+        .input-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 150px;}
+        .input-group label { color: var(--hotel-dark); font-weight: bold; font-size: 14px; }
+        .input-group input, .input-group select {
+            padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; font-family: 'Outfit'; outline: none; transition: border 0.3s; width: 100%; box-sizing: border-box; background: white;
+        }
+        .input-group input:focus, .input-group select:focus { border-color: var(--hotel-primary); }
+        
+        .book-btn {
+            background: linear-gradient(to right, var(--hotel-primary), var(--hotel-accent)); color: white; border: none; padding: 0 30px; border-radius: 10px; font-size: 18px;
+            font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 25px; height: 50px; width: 100%; box-sizing: border-box; display: inline-flex; justify-content: center; align-items: center; text-decoration: none;
+        }
+        .book-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); }
+
+        .section-container { padding: 0 20px 40px 20px; max-width: 1200px; margin: 0 auto; text-align: center; }
+        
+        .section-container h2 { 
+            font-size: 32px; color: var(--hotel-dark); margin-bottom: 50px; padding: 10px 30px; 
+            background: rgba(255,255,255,0.9); display: inline-block; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); backdrop-filter: blur(5px);
+        }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        
+        .card { background: rgba(255, 255, 255, 0.95); border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: left; transition: transform 0.3s; display: flex; flex-direction: column; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); }
+        .card:hover { transform: translateY(-10px); }
+        .card img { width: 100%; height: 220px; object-fit: cover; }
+        .card-content { padding: 25px; display: flex; flex-direction: column; flex: 1; }
+        .card-content h3 { margin: 0 0 10px 0; font-size: 22px; color: var(--hotel-dark); }
+        .card-content p.desc { color: #64748b; font-size: 14px; margin-bottom: 15px; flex: 1; line-height: 1.5; }
+        .capacity { font-size: 13px; font-weight: bold; background: #e0e7ff; color: var(--hotel-primary); padding: 5px 10px; border-radius: 6px; display: inline-block; margin-bottom: 15px; width: fit-content; border: 1px solid #c7d2fe; }
+        .price { color: var(--hotel-primary); font-weight: bold; font-size: 20px; margin-bottom: 20px; display: block; }
+        
+        .action-btn { display: block; width: 100%; text-align: center; padding: 12px 0; background: var(--hotel-dark); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s;}
+        .action-btn:hover { background: var(--hotel-primary); }
+
+        .hidden { display: none !important; }
+        
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
+            display: flex; align-items: center; justify-content: center; 
+            z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(5px); padding: 20px; box-sizing: border-box;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal { 
+            background: white; padding: 30px; border-radius: 20px; text-align: center; 
+            width: 100%; max-width: 550px; transform: translateY(20px); transition: transform 0.3s;
+            max-height: 90vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .modal-overlay.active .modal { transform: translateY(0); }
+
+        /* Custom Footer Style */
+        .hotel-footer {
+            background: rgba(30, 27, 75, 0.95);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            margin-top: 60px;
+            border-top: 2px solid var(--hotel-primary);
+        }
+        .hotel-footer h2 { margin: 0 0 15px 0; font-size: 28px; color: #e0e7ff; }
+        .hotel-footer p { margin: 5px 0; font-size: 15px; color: #cbd5e1; }
+
+        /* Top Auth Navigation */
+        .top-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 50px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .top-nav .logo { color: white; font-size: 26px; font-weight: bold; text-shadow: 1px 1px 10px rgba(0,0,0,0.6); }
+        .top-nav .nav-links { display: flex; align-items: center; gap: 25px; }
+        .nav-link { color: white; text-decoration: none; font-weight: 500; font-size: 17px; text-shadow: 1px 1px 5px rgba(0,0,0,0.6); transition: opacity 0.3s; }
+        .nav-link:hover { opacity: 0.8; }
+        .nav-btn { background: var(--hotel-primary); color: white; text-decoration: none; padding: 10px 25px; border-radius: 30px; font-weight: bold; font-size: 16px; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 2px solid transparent; cursor: pointer; }
+        .nav-btn:hover { background: transparent; border-color: white; transform: translateY(-2px); }
+        
+        .user-profile-badge {
+            color: white; font-weight: bold; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; font-size: 14px; backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 768px) {
+            .top-nav { padding: 15px 20px; flex-direction: column; gap: 15px; }
+            .hero h1 { font-size: 40px; margin-top: 50px; }
+            .hero p { font-size: 16px; }
+            .tabs-wrapper { margin-top: 20px; }
+            @media (min-width: 769px){ .booking-widget .book-btn { flex: 1; height: 45px; align-self: flex-end; } }
+            @media (max-width: 768px){ .booking-widget .book-btn { margin-top: 10px; } }
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo-container">
-                <div class="logo-icon">H</div>
-                <h1>SmartHotel AI</h1>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-target="dashboard">
-                    <ion-icon name="grid-outline"></ion-icon> Dashboard
-                </a>
-                <a href="#" class="nav-item" data-target="rooms">
-                    <ion-icon name="bed-outline"></ion-icon> Rooms
-                </a>
-                <a href="#" class="nav-item" data-target="guests">
-                    <ion-icon name="people-outline"></ion-icon> Guests
-                </a>
-                <a href="#" class="nav-item" data-target="pos">
-                    <ion-icon name="restaurant-outline"></ion-icon> Restaurant POS
-                </a>
-            </nav>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="top-nav glass">
-                <h2 id="page-title">Dashboard</h2>
-                <div class="user-actions">
-                    <button class="icon-btn"><ion-icon name="notifications-outline"></ion-icon></button>
-                    <div class="user-profile">
-                        <div class="avatar">A</div>
-                        <span>Super Admin</span>
-                    </div>
-                </div>
-            </header>
+    <!-- TOP NAVIGATION BAR -->
+    <header class="top-nav">
+        <div class="logo">Aidenh Apartments</div>
+        <div class="nav-links" id="nav-container">
+            <a href="login.html" class="nav-link">Log In</a>
+            <a href="login.html" class="nav-btn">Sign Up</a>
+        </div>
+    </header>
 
-            <div class="view-container">
-                <!-- Dashboard View -->
-                <div id="dashboard" class="view active">
-                    <div class="stats-grid">
-                        <div class="stat-card glass">
-                            <h3>Total Rooms</h3>
-                            <p class="stat-value">120</p>
-                        </div>
-                        <div class="stat-card glass">
-                            <h3>Occupancy Rate</h3>
-                            <p class="stat-value">78%</p>
-                        </div>
-                        <div class="stat-card glass">
-                            <h3>Daily Revenue</h3>
-                            <p class="stat-value">$4,250</p>
-                        </div>
-                        <div class="stat-card glass">
-                            <h3>Active Bookings</h3>
-                            <p class="stat-value">45</p>
-                        </div>
-                    </div>
-                    <div class="chart-container glass">
-                        <p class="placeholder-text">Revenue Chart Placeholder</p>
-                    </div>
-                </div>
-
-                <!-- Rooms View -->
-                <div id="rooms" class="view hidden">
-                    <div class="rooms-grid" id="rooms-container">
-                        <!-- Rooms generated by JS -->
-                    </div>
-                </div>
-
-                <!-- Guests View -->
-                <div id="guests" class="view hidden">
-                    <div class="guests-container glass">
-                        <h2>Guest Management Dashboard - Coming Soon</h2>
-                    </div>
-                </div>
-
-                <!-- POS View -->
-                <div id="pos" class="view hidden">
-                    <div class="pos-container">
-                        <div class="menu-section glass">
-                            <h3>Menu Items</h3>
-                            <div class="menu-grid" id="menu-container">
-                                <!-- Menu items via JS -->
-                            </div>
-                        </div>
-                        <div class="order-section glass">
-                            <h3>Current Order</h3>
-                            <div class="order-items" id="order-items">
-                                <!-- Orders via JS -->
-                            </div>
-                            <div class="order-summary">
-                                <div class="total-row">
-                                    <span>Total</span>
-                                    <span id="order-total">$0.00</span>
-                                </div>
-                                <button class="btn btn-primary" style="width: 100%; margin-top: 15px;">Charge to Room</button>
-                                <button class="btn btn-dark" style="width: 100%; margin-top: 10px;">Pay Now</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- AI Assistant -->
-            <button id="ai-fab" class="ai-fab"><ion-icon name="chatbubbles-outline"></ion-icon></button>
-            <div id="ai-chat" class="ai-chat-window hidden">
-                <div class="chat-header">
-                    <ion-icon name="chatbubbles"></ion-icon> AI Assistant
-                </div>
-                <div class="chat-body" id="chat-body">
-                    <div class="chat-bubble ai-bubble">
-                        Hello! I can help you manage bookings, check room status, or process POS orders. How can I assist you today?
-                    </div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Type a message...">
-                    <button class="btn btn-primary" id="chat-send">Send</button>
-                </div>
-            </div>
-        </main>
+    <div class="hero">
+        <h1>Aidenh Apartments</h1>
+        <p>Two Streams - Mangoase Junction, Koforidua. Experience luxury living with seamless reservations.</p>
     </div>
-    <!-- Firebase Libraries for Dashboard & Firestore Database sync -->
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
-    <script src="script.js"></script>
+
+    <!-- TABS -->
+    <div class="tabs-wrapper">
+        <button class="tab-btn active" onclick="switchTab('tab-rooms', this)">🏨 Reserve a Room</button>
+        <button class="tab-btn" onclick="switchTab('tab-foods', this)">🍔 Foods</button>
+        <button class="tab-btn" onclick="switchTab('tab-drinks', this)">🍸 Drinks</button>
+        <button class="tab-btn" onclick="switchTab('tab-water', this)">💧 Premium Water</button>
+    </div>
+
+    <!-- ROOMS TAB -->
+    <div id="tab-rooms" class="tab-content active">
+        <div class="booking-widget">
+            <div class="input-group">
+                <label>Check In (12:00 pm)</label>
+                <input type="date" id="checkin">
+            </div>
+            <div class="input-group">
+                <label>Check Out (12:00 pm)</label>
+                <input type="date" id="checkout">
+            </div>
+            <div class="input-group">
+                <label>How many people?</label>
+                <select id="guests-count">
+                    <option value="1">1 Person</option>
+                    <option value="2" selected>2 People</option>
+                    <option value="3">3 People</option>
+                    <option value="4">4 People</option>
+                    <option value="6">6 People</option>
+                    <option value="8">8+ People</option>
+                </select>
+            </div>
+            <div class="input-group" style="flex: 0.5;">
+                <button class="book-btn" onclick="executeSearch()">Search</button>
+            </div>
+        </div>
+
+        <div id="search-results" class="section-container hidden">
+            <h2 style="color: var(--hotel-primary);">Available Rooms Match Your Needs</h2>
+            <div class="grid" id="rooms-container">
+            </div>
+        </div>
+    </div>
+
+    <!-- FOODS TAB -->
+    <div id="tab-foods" class="tab-content section-container">
+        <h2>In-Room Gourmet Foods</h2>
+        <div class="grid" id="foods-container"></div>
+    </div>
+
+    <!-- DRINKS TAB -->
+    <div id="tab-drinks" class="tab-content section-container">
+        <h2>Signature Cocktails & Beverages</h2>
+        <div class="grid" id="drinks-container"></div>
+    </div>
+
+    <!-- WATER TAB -->
+    <div id="tab-water" class="tab-content section-container">
+        <h2>Refreshments & Water</h2>
+        <div class="grid" id="water-container"></div>
+    </div>
+
+
+    <!-- ROOM BOOKING PAYSTACK MODAL WITH 'RESERVE ONLY' FEATURE -->
+    <div class="modal-overlay" id="booking-modal">
+        <div class="modal" style="text-align: left;">
+            <h3 style="text-align: center; color: var(--hotel-primary); font-size: 24px; margin-top:0; margin-bottom: 20px;">Complete Your Reservation</h3>
+            <form id="payment-form" onsubmit="payWithPaystack(event)">
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label>Full Name *</label>
+                    <input type="text" id="guest-name" required placeholder="John Doe">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label>Email Address *</label>
+                    <input type="email" id="guest-email" required placeholder="john@example.com">
+                </div>
+                
+                <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: var(--hotel-dark)">Booking Summary</p>
+                    <div style="display:flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px;">
+                        <span>Room Type:</span> <strong id="summary-room">...</strong>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px;">
+                        <span>Dates:</span> <strong id="summary-dates">...</strong>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px;">
+                        <span>Duration:</span> <strong id="summary-nights">...</strong>
+                    </div>
+                    <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 10px 0;">
+                    <div style="display:flex; justify-content: space-between; font-size: 18px; color: var(--hotel-primary);">
+                        <span>Total Price:</span> <strong id="summary-total">GHS 0</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="action-btn" style="background: #ef4444; flex: 1; padding: 12px 10px;" onclick="closeBookingModal()">Cancel</button>
+                    <!-- Reserve Only triggers a separate flow without Paystack -->
+                    <button type="button" class="action-btn" style="background: white; color: var(--hotel-primary); border: 2px solid var(--hotel-primary); flex: 1.5; padding: 12px 10px;" onclick="reserveWithoutPayment()">Reserve (Pay at Hotel)</button>
+                    <button type="submit" class="book-btn" style="margin-top: 0; flex: 2; font-size: 16px; padding: 12px 10px;">Pay via Paystack</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- FOOD & DRINK ORDER PAYSTACK MODAL -->
+    <div class="modal-overlay" id="item-modal">
+        <div class="modal" style="text-align: left;">
+            <h3 style="text-align: center; color: var(--hotel-primary); font-size: 24px; margin-top:0; margin-bottom: 20px;">Complete Your Order</h3>
+            <form id="item-payment-form" onsubmit="payItemWithPaystack(event)">
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label>Full Name</label>
+                    <input type="text" id="item-guest-name" required placeholder="John Doe">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label>Email Address</label>
+                    <input type="email" id="item-guest-email" required placeholder="john@example.com">
+                </div>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label>Room Number / Table (Optional)</label>
+                    <input type="text" id="item-room-num" placeholder="e.g. Room 104">
+                </div>
+                
+                <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: var(--hotel-dark)">Order Summary</p>
+                    <div style="display:flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px;">
+                        <span>Item:</span> <strong id="summary-item-name" style="text-align: right; max-width: 60%;">...</strong>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; align-items: center;">
+                        <span>Quantity:</span> 
+                        <select id="item-qty" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #cbd5e1; width: auto;" onchange="updateItemTotal()">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 10px 0;">
+                    <div style="display:flex; justify-content: space-between; font-size: 18px; color: var(--hotel-primary);">
+                        <span>Total Price:</span> <strong id="summary-item-total">GHS 0</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="action-btn" style="background: #ef4444; flex: 1;" onclick="closeItemModal()">Cancel</button>
+                    <!-- Reserve Only for Food -->
+                    <button type="button" class="action-btn" style="background: white; color: var(--hotel-primary); border: 2px solid var(--hotel-primary); flex: 1.5; padding: 12px 10px;" onclick="reserveFoodWithoutPayment()">Charge to Room</button>
+                    <button type="submit" class="book-btn" style="margin-top: 0; flex: 2; font-size: 16px;">Pay Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Simple Status Modal (General Success) -->
+    <div class="modal-overlay" id="status-modal">
+        <div class="modal">
+            <h3 id="status-title" style="color:var(--hotel-primary); font-size:24px;">Success</h3>
+            <p id="status-desc" style="color: #64748b; font-size:16px;">Action was completed.</p>
+            <button class="action-btn" style="background: var(--hotel-primary);" onclick="document.getElementById('status-modal').classList.remove('active')">Okay</button>
+        </div>
+    </div>
+
+    <!-- MAIN FOOTER WITH INFO -->
+    <footer class="hotel-footer">
+        <h2>Aidenh Apartments</h2>
+        <p>Two Streams - Mangoase Junction, Koforidua (3Q64+52)</p>
+        <p>📞 059 918 1742 | 🌐 aidenhapartments.com</p>
+        <p style="margin-top: 15px; font-weight: bold; color: var(--hotel-primary);">Check-in time: 12:00 pm | Check-out time: 12:00 pm</p>
+    </footer>
+
+    <script>
+        // =========================================================
+        //                 FIREBASE INITIALIZATION
+        // =========================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8BoL8yfKIQ2o-tVmbrVfx0TXcUvudzyY",
+            authDomain: "project-3cccff25-b1fb-4aa9-978.firebaseapp.com",
+            projectId: "project-3cccff25-b1fb-4aa9-978",
+            storageBucket: "project-3cccff25-b1fb-4aa9-978.firebasestorage.app",
+            messagingSenderId: "1009826575246",
+            appId: "1:1009826575246:web:595912191007526e5deadf"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // AUTHENTICATION STATE TRACKER
+        auth.onAuthStateChanged((user) => {
+            const navContainer = document.getElementById('nav-container');
+            const prefilledName = document.getElementById('guest-name');
+            const prefilledEmail = document.getElementById('guest-email');
+            const itemEmail = document.getElementById('item-guest-email');
+            
+            if (user) {
+                // Determine display identifier (Name, Email, or Phone)
+                const identifier = user.displayName || user.email || user.phoneNumber || 'Auth Guest';
+                
+                // Replace Login/Signup with Profile & Logout
+                navContainer.innerHTML = `
+                    <div class="user-profile-badge">
+                        👤 ${identifier}
+                    </div>
+                    <button onclick="logoutApp()" class="nav-btn" style="background: #ef4444; border:none;">Log Out</button>
+                `;
+
+                // Auto-fill booking forms if they are logged in!
+                if(user.displayName) prefilledName.value = user.displayName;
+                if(user.email) {
+                    prefilledEmail.value = user.email;
+                    itemEmail.value = user.email;
+                }
+                
+            } else {
+                navContainer.innerHTML = `
+                    <a href="login.html" class="nav-link">Log In</a>
+                    <a href="login.html" class="nav-btn">Sign Up</a>
+                `;
+            }
+        });
+
+        function logoutApp() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            });
+        }
+
+        // --- DATA DICTIONARIES ---
+
+        const RAW_ROOMS = [
+            { name: "Standard Queen Room", img: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c", desc: "1 queen bed. Free breakfast · Free Wi-Fi · Free parking.", cap: 2, price: 897 },
+            { name: "Family Double & Twin", img: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461", desc: "1 double bed, 1 twin bed. Free cancellation until 13 May · Free Wi-Fi.", cap: 3, price: 598 },
+            { name: "Economy Room", img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", desc: "Cozy space for solo travelers. Free cancellation until 12 May.", cap: 1, price: 376 },
+            { name: "Ocean View King", img: "https://images.unsplash.com/photo-1618773928120-d3c5fcc655eb", desc: "1 king bed. Free breakfast · Free Wi-Fi · Free parking.", cap: 2, price: 897 },
+            { name: "Honeymoon Suite", img: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b", desc: "1 double bed. Free cancellation until 13 May. Romantic decor.", cap: 2, price: 598 },
+            { name: "Business Suite", img: "https://images.unsplash.com/photo-1541123437800-141315fc38c0", desc: "1 double bed, 1 twin bed. Includes conference desk and priority Wi-Fi.", cap: 3, price: 598 },
+            { name: "Accessible Double", img: "https://images.unsplash.com/photo-1616486022634-11116c49c716", desc: "1 double bed. Fully accessible ground floor room layout. Free Wi-Fi.", cap: 2, price: 376 },
+            { name: "Skyline Corner Room", img: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4", desc: "1 queen bed. Free cancellation · Free parking.", cap: 2, price: 598 },
+            { name: "Basic Queen", img: "https://images.unsplash.com/photo-1533759413974-9e15f3b745ac", desc: "1 queen bed. Simple, clean layout. Free Wi-Fi.", cap: 2, price: 376 },
+            { name: "Superior King Room", img: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7", desc: "1 queen bed. Free breakfast · Free parking.", cap: 2, price: 897 },
+            { name: "Economy Twin", img: "https://images.unsplash.com/photo-1631049552057-4032b1713361", desc: "2 twin beds. Free cancellation until 12 May.", cap: 2, price: 376 },
+            { name: "Premium Twin", img: "https://images.unsplash.com/photo-1574643033580-f09c6cdb9d99", desc: "1 double bed, 1 twin bed. High floor unit.", cap: 3, price: 598 },
+            { name: "Junior Suite", img: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6", desc: "1 double bed. Free Wi-Fi · Free parking.", cap: 2, price: 376 },
+            { name: "Cabin Retreat", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9", desc: "1 queen bed. Imitation log cabin room layout.", cap: 2, price: 598 },
+            { name: "Historic Suite", img: "https://images.unsplash.com/photo-1582719508461-905c673771fd", desc: "1 double bed, 1 twin bed. Classic design with modern intelligent amenities.", cap: 3, price: 598 },
+            { name: "Presidential Suite", img: "https://images.unsplash.com/photo-1590490360182-c33d57733427", desc: "1 queen bed. Free breakfast · Free Wi-Fi · Free parking.", cap: 2, price: 897 },
+            { name: "Grand Master Suite", img: "https://images.unsplash.com/photo-1611892440504-42a792e24d32", desc: "1 queen bed. Regal styling with dining area.", cap: 2, price: 897 },
+            { name: "Family Suite", img: "https://images.unsplash.com/photo-1566665797739-1674de7a421a", desc: "2 double beds, 1 twin bed. Free cancellation.", cap: 5, price: 897 },
+            { name: "Penthouse Royale", img: "https://images.unsplash.com/photo-1600121848594-d8644e57abab", desc: "3 queen beds. Free breakfast · Free Wi-Fi.", cap: 6, price: 897 },
+            { name: "Luxury Villa", img: "https://images.unsplash.com/photo-1510798831971-661eb04b3739", desc: "4 double beds. Free breakfast · Free Wi-Fi · Free parking.", cap: 8, price: 897 }
+        ];
+
+        const FOODS = [
+            { name: "Signature Truffle Burger", img: "https://images.unsplash.com/photo-1560963689-02e820ce8fbc", desc: "Wagyu beef patty topped with aged cheddar.", price: 18.5 },
+            { name: "Seafood Linguine", img: "https://images.unsplash.com/photo-1551183053-bf91a1d81141", desc: "Fresh shrimp and mussels in white wine sauce.", price: 24.0 },
+            { name: "Prime Ribeye Steak", img: "https://images.unsplash.com/photo-1544148103-0773bf10d330", desc: "12oz grilled to perfection with seasonal greens.", price: 45.0 },
+            { name: "Classic Club Sandwich", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af", desc: "Triple decker oven-roasted turkey and crispy bacon.", price: 15.0 },
+            { name: "Margherita Pizza", img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002", desc: "Wood-fired baked with fresh mozzarella and basil.", price: 19.0 },
+            { name: "Fresh Caesar Salad", img: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9", desc: "Crisp romaine, fresh parmesan, and house croutons.", price: 12.0 },
+            { name: "Grilled Salmon Bowl", img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288", desc: "Wild caught salmon over quinoa and ripe avocado.", price: 26.0 },
+            { name: "Roasted Lemon Chicken", img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d", desc: "Half hen roasted slowly with a rich lemon herb butter.", price: 22.0 },
+            { name: "Chocolate Lava Cake", img: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95", desc: "Molten dark chocolate core with vanilla bean cast.", price: 11.0 },
+            { name: "Artisanal Cheese Board", img: "https://images.unsplash.com/photo-1631388654498-888e99e69c11", desc: "Local sharp curds, honeycomb, and crispy baguettes.", price: 28.0 }
+        ];
+
+        const DRINKS = [
+            { name: "Sunset Martini", img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc", desc: "Premium vodka and passion fruit extract.", price: 14.0 },
+            { name: "Iced Caramel Macchiato", img: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf", desc: "Espresso over fresh ice with rich caramel drizzle.", price: 6.5 },
+            { name: "Vintage Red Wine", img: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb", desc: "By the glass: 2014 Reserve Cabernet Sauvignon.", price: 16.0 },
+            { name: "Fresh Orange Juice", img: "https://images.unsplash.com/photo-1600271886742-f049cd451bba", desc: "Freshly squeezed morning navel oranges.", price: 5.0 }
+        ];
+
+        const WATER = [
+            { name: "Bottled Spring Water", img: "https://images.unsplash.com/photo-1548839140-29a749e1bc4e", desc: "Ice cold premium glacial mountain spring water.", price: 4.0 },
+            { name: "Sparkling Mineral Water", img: "https://images.unsplash.com/photo-1555512255-afee4dcce3ff", desc: "Carbonated purity with a slice of fresh lemon.", price: 5.5 }
+        ];
+
+        // --- DATE VALIDATION SETUP ---
+        const checkinInput = document.getElementById('checkin');
+        const checkoutInput = document.getElementById('checkout');
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        checkinInput.setAttribute('min', todayStr);
+        checkoutInput.setAttribute('min', todayStr);
+
+        checkinInput.valueAsDate = new Date();
+        let tmrw = new Date(); tmrw.setDate(tmrw.getDate() + 2);
+        checkoutInput.valueAsDate = tmrw;
+
+        checkinInput.addEventListener('change', function() {
+            checkoutInput.setAttribute('min', this.value);
+            if(checkoutInput.value < this.value) { checkoutInput.value = this.value; }
+        });
+
+        // --- RENDER DOM ---
+
+        function renderCards(arrayData, containerId, btnLabel) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            arrayData.forEach(item => {
+                container.innerHTML += `
+                    <div class="card">
+                        <img src="${item.img}?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="${item.name}">
+                        <div class="card-content">
+                            <h3>${item.name}</h3>
+                            <p class="desc">${item.desc}</p>
+                            <span class="price">GHS ${item.price.toFixed(2)}</span>
+                            <button class="action-btn" style="background:#4f46e5" onclick="openItemModal('${item.name}', ${item.price})">${btnLabel}</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        renderCards(FOODS, 'foods-container', '+ Order Food');
+        renderCards(DRINKS, 'drinks-container', '+ Order Drink');
+        renderCards(WATER, 'water-container', '+ Request to Room');
+
+
+        // --- TABS LOGIC ---
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            btnElement.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // --- SEARCH LOGIC ---
+        function executeSearch() {
+            const requestedGuests = parseInt(document.getElementById('guests-count').value);
+            const validRooms = RAW_ROOMS.filter(r => r.cap >= requestedGuests);
+            const roomsContainer = document.getElementById('rooms-container');
+            
+            roomsContainer.innerHTML = ''; 
+            if(validRooms.length === 0) {
+                roomsContainer.innerHTML = '<h3 style="grid-column: 1/-1; text-align: center; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 10px;">No rooms available for a group this large. Please consider multiple bookings.</h3>';
+            } else {
+                validRooms.forEach(room => {
+                    roomsContainer.innerHTML += `
+                        <div class="card">
+                            <img src="${room.img}?auto=format&fit=crop&q=80" alt="${room.name}">
+                            <div class="card-content">
+                                <h3>${room.name}</h3>
+                                <p class="desc" style="margin-bottom: 5px;">${room.desc}</p>
+                                <span class="capacity">Accommodates up to ${room.cap} People</span>
+                                <span class="price" style="margin-top: auto;">GHS ${room.price.toFixed(2)} <span style="font-size:14px;font-weight:normal;color:#64748b">/ night</span></span>
+                                <button class="action-btn" onclick="openBookingModal('${room.name}', ${room.price})">Book This Room</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            const results = document.getElementById('search-results');
+            results.classList.remove('hidden');
+        }
+
+        // =========================================================
+        //                 A. ROOM BOOKING LOGIC
+        // =========================================================
+        let bookingState = { roomName: '', pricePerNight: 0, nights: 1, total: 0, checkinDate: '', checkoutDate: '' };
+        const bookingModal = document.getElementById('booking-modal');
+
+        function openBookingModal(roomName, price) {
+            const c_in = new Date(document.getElementById('checkin').value);
+            const c_out = new Date(document.getElementById('checkout').value);
+            
+            let timeDiff = Math.abs(c_out.getTime() - c_in.getTime());
+            let nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            if(nights === 0) nights = 1; 
+
+            const totalAmount = nights * price;
+            
+            bookingState.roomName = roomName;
+            bookingState.pricePerNight = price;
+            bookingState.nights = nights;
+            bookingState.total = totalAmount;
+            bookingState.checkinDate = checkinInput.value;
+            bookingState.checkoutDate = checkoutInput.value;
+
+            document.getElementById('summary-room').textContent = roomName;
+            document.getElementById('summary-dates').textContent = `${checkinInput.value} to ${checkoutInput.value}`;
+            document.getElementById('summary-nights').textContent = `${nights} Nights`;
+            document.getElementById('summary-total').textContent = `GHS ${totalAmount.toFixed(2)}`;
+
+            bookingModal.classList.add('active');
+        }
+
+        function closeBookingModal() { bookingModal.classList.remove('active'); }
+
+        function reserveWithoutPayment() {
+            const name = document.getElementById('guest-name').value;
+            const email = document.getElementById('guest-email').value;
+            
+            if(!name || !email) {
+                alert("Please fill in your Name and Email address first to reserve the room!");
+                return;
+            }
+            const ref = 'RES-' + Math.floor(Math.random() * 1000000000);
+            generatePDF(name, email, ref, true);
+        }
+
+        function payWithPaystack(e) {
+            e.preventDefault();
+            const name = document.getElementById('guest-name').value;
+            const email = document.getElementById('guest-email').value;
+            const amountInCents = bookingState.total * 100;
+            
+            let handler = PaystackPop.setup({
+                key: 'pk_test_9f6d71b5061bfc2a7ca155420c214550e4f72ae2',     
+                email: email,
+                amount: amountInCents,
+                currency: 'GHS', 
+                metadata: { custom_fields: [{ display_name: "Room", variable_name: "room_type", value: bookingState.roomName }] },
+                onClose: function(){ alert('Payment window closed. Booking incomplete.'); },
+                callback: function(response){
+                    generatePDF(name, email, response.reference, false);
+                }
+            });
+            handler.openIframe(); 
+        }
+
+        function generatePDF(guestName, guestEmail, transactionRef, isReservation = false) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(24);
+            doc.setTextColor(30, 27, 75); 
+            doc.text("Aidenh Apartments - Official Document", 20, 25);
+            doc.setDrawColor(203, 213, 225);
+            doc.line(20, 32, 190, 32);
+
+            doc.setFontSize(12);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Reference No: ${transactionRef}`, 20, 45);
+            doc.text(`Guest Name: ${guestName}`, 20, 55);
+            doc.text(`Email Address: ${guestEmail}`, 20, 65);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 120, 45);
+
+            doc.setFontSize(14);
+            if(isReservation) {
+                doc.setTextColor(239, 68, 68); 
+                doc.text("STATUS: UNPAID (PAY AT FRONT DESK)", 110, 65);
+            } else {
+                doc.setTextColor(34, 197, 94); 
+                doc.text("STATUS: FULLY PAID", 120, 65);
+            }
+
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, 80, 170, 70, 'F');
+            
+            doc.setFontSize(14);
+            doc.setTextColor(51, 65, 85);
+            doc.text(`Room Classification:  ${bookingState.roomName}`, 30, 95);
+            doc.text(`Dates of Stay:           ${bookingState.checkinDate} to ${bookingState.checkoutDate}`, 30, 110);
+            doc.text(`Duration:                   ${bookingState.nights} Nights`, 30, 125);
+            doc.text(`Base Rate:                GHS ${bookingState.pricePerNight.toFixed(2)} per night`, 30, 140);
+
+            doc.setDrawColor(79, 70, 229);
+            doc.setLineWidth(1);
+            doc.line(20, 160, 190, 160);
+            
+            doc.setFontSize(22);
+            if(isReservation) {
+                doc.setTextColor(239, 68, 68);
+                doc.text(`Due at Check-In: GHS ${bookingState.total.toFixed(2)}`, 20, 175);
+            } else {
+                doc.setTextColor(79, 70, 229);
+                doc.text(`Total Amount Paid: GHS ${bookingState.total.toFixed(2)}`, 20, 175);
+            }
+
+            doc.setFontSize(10);
+            doc.setTextColor(148, 163, 184);
+            doc.text("If you chose to reserve without payment, please bring this reference to the front desk.", 20, 270);
+            doc.text("Thank you for choosing Aidenh Apartments! We look forward to your arrival.", 20, 280);
+
+            let pdfName = isReservation ? `Aidenh_Reservation_${transactionRef}.pdf` : `Aidenh_Receipt_${transactionRef}.pdf`;
+            doc.save(pdfName);
+
+            // ================== CLOUD FIRESTORE WRITE FOR ADMIN DASHBOARD ==================
+            if (db) {
+                db.collection('bookings').add({
+                    type: 'Room Booking',
+                    status: isReservation ? 'Unpaid Reservation' : 'Fully Paid',
+                    roomType: bookingState.roomName,
+                    guestName: guestName,
+                    guestEmail: guestEmail,
+                    totalPaid: bookingState.total, // Replaces `price` dynamically on Dash
+                    checkin: bookingState.checkinDate,
+                    checkout: bookingState.checkoutDate,
+                    reference: transactionRef,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => console.log("Booking synced to Admin Dashboard!")).catch(e => console.error(e));
+            }
+            // ===============================================================================
+
+            closeBookingModal();
+            
+            document.getElementById('status-title').textContent = isReservation ? 'Reservation Confirmed!' : 'Booking Complete!';
+            document.getElementById('status-desc').innerHTML = isReservation ?
+                `Your room has been temporarily reserved! Please prepare to pay <b>GHS ${bookingState.total.toFixed(2)}</b> physically at the reception during your Check-in. <br><br> Your Digital PDF Reservation is downloading...` :
+                `Your payment was successful and your room is officially secured. <br><br> Your Digital PDF Receipt is downloading automatically!`;
+            
+            document.getElementById('status-modal').classList.add('active');
+        }
+
+
+        // =========================================================
+        //                 B. FOOD & DRINK ORDER LOGIC
+        // =========================================================
+        let itemState = { itemName: '', price: 0, qty: 1, total: 0 };
+        const itemModal = document.getElementById('item-modal');
+
+        function openItemModal(itemName, itemPrice) {
+            itemState.itemName = itemName;
+            itemState.price = itemPrice;
+            itemState.qty = 1;
+            itemState.total = itemPrice;
+
+            document.getElementById('item-qty').value = "1";
+            document.getElementById('summary-item-name').textContent = itemName;
+            document.getElementById('summary-item-total').textContent = `GHS ${itemState.total.toFixed(2)}`;
+
+            itemModal.classList.add('active');
+        }
+
+        function closeItemModal() { itemModal.classList.remove('active'); }
+
+        function updateItemTotal() {
+            const qty = parseInt(document.getElementById('item-qty').value);
+            itemState.qty = qty;
+            itemState.total = qty * itemState.price;
+            document.getElementById('summary-item-total').textContent = `GHS ${itemState.total.toFixed(2)}`;
+        }
+
+        function reserveFoodWithoutPayment() {
+            const name = document.getElementById('item-guest-name').value;
+            const email = document.getElementById('item-guest-email').value;
+            const roomNum = document.getElementById('item-room-num').value;
+            
+            if(!name || !email || !roomNum) {
+                alert("Please fill in your Name, Email, and Room Number so we know where to deliver it!");
+                return;
+            }
+
+            const ref = 'ORD-' + Math.floor(Math.random() * 1000000000);
+            generateItemPDF(name, email, roomNum, ref, true);
+        }
+
+        function payItemWithPaystack(e) {
+            e.preventDefault();
+            const name = document.getElementById('item-guest-name').value;
+            const email = document.getElementById('item-guest-email').value;
+            const roomNum = document.getElementById('item-room-num').value || 'Dining Hall';
+            
+            const amountInCents = itemState.total * 100;
+            
+            let handler = PaystackPop.setup({
+                key: 'pk_test_9f6d71b5061bfc2a7ca155420c214550e4f72ae2',  
+                email: email,
+                amount: amountInCents,
+                currency: 'GHS', 
+                metadata: { custom_fields: [{ display_name: "Item", variable_name: "item_type", value: itemState.itemName }] },
+                onClose: function(){ alert('Payment window closed. Order was canceled.'); },
+                callback: function(response){
+                    generateItemPDF(name, email, roomNum, response.reference, false);
+                }
+            });
+            handler.openIframe(); 
+        }
+
+        function generateItemPDF(guestName, guestEmail, roomLocation, transactionRef, isChargedToRoom = false) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(24);
+            doc.setTextColor(30, 27, 75); 
+            doc.text("Aidenh Apartments - Order Receipt", 20, 25);
+            doc.setDrawColor(203, 213, 225);
+            doc.line(20, 32, 190, 32);
+
+            doc.setFontSize(12);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Order Reference: ${transactionRef}`, 20, 45);
+            doc.text(`Customer Name: ${guestName}`, 20, 55);
+            doc.text(`Delivery Target: ${roomLocation}`, 20, 65);
+            doc.text(`Date & Time: ${new Date().toLocaleString()}`, 120, 45);
+
+            doc.setFontSize(14);
+            if(isChargedToRoom) {
+                doc.setTextColor(245, 158, 11);
+                doc.text("STATUS: CHARGED TO ROOM ACCOUNT", 100, 65);
+            } else {
+                doc.setTextColor(34, 197, 94);
+                doc.text("STATUS: FULLY PAID ONLINE", 120, 65);
+            }
+
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, 80, 170, 70, 'F');
+            
+            doc.setFontSize(14);
+            doc.setTextColor(51, 65, 85);
+            doc.text(`Item Ordered:      ${itemState.itemName}`, 30, 95);
+            doc.text(`Quantity:              x${itemState.qty}`, 30, 110);
+            doc.text(`Unit Price:            GHS ${itemState.price.toFixed(2)}`, 30, 125);
+
+            doc.setDrawColor(79, 70, 229);
+            doc.setLineWidth(1);
+            doc.line(20, 160, 190, 160);
+            
+            doc.setFontSize(22);
+            doc.setTextColor(79, 70, 229);
+            if(isChargedToRoom) {
+                doc.setTextColor(245, 158, 11);
+                doc.text(`Added to Room Bill: GHS ${itemState.total.toFixed(2)}`, 20, 175);
+            } else {
+                doc.setTextColor(79, 70, 229);
+                doc.text(`Amount Paid Online: GHS ${itemState.total.toFixed(2)}`, 20, 175);
+            }
+
+            doc.setFontSize(10);
+            doc.setTextColor(148, 163, 184);
+            doc.text("Your order has been sent off to our kitchen/bar team and will be delivered shortly.", 20, 270);
+            doc.text("Thank you for choosing Aidenh Apartments!", 20, 280);
+
+            doc.save(`Aidenh_Order_${transactionRef}.pdf`);
+            
+            // ================== CLOUD FIRESTORE WRITE FOR ADMIN DASHBOARD ==================
+            if (db) {
+                db.collection('orders').add({
+                    type: 'Restaurant / Bar Order',
+                    status: isChargedToRoom ? 'Charged to Room (Unpaid)' : 'Fully Paid',
+                    item: itemState.itemName,
+                    quantity: itemState.qty,
+                    roomTarget: roomLocation,
+                    guestName: guestName,
+                    guestEmail: guestEmail,
+                    totalPaid: itemState.total, // Replaces `price` dynamically on Dash
+                    reference: transactionRef,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => console.log("Order synced to Admin Dashboard!")).catch(e => console.error(e));
+            }
+            // ===============================================================================
+
+            closeItemModal();
+            
+            document.getElementById('status-title').textContent = isChargedToRoom ? 'Charged to Room!' : 'Order Confirmed!';
+            document.getElementById('status-desc').innerHTML = isChargedToRoom ? 
+                `Your order for <b>${itemState.qty}x ${itemState.itemName}</b> has been received and added to your room checkout bill. Kitchen is prepping it now for Room ${roomLocation}.` :
+                `Your payment was successful. We are actively preparing <b>${itemState.qty}x ${itemState.itemName}</b> for delivery to <b>${roomLocation}</b>. <br><br> Your Digital PDF Receipt is downloading!`;
+                
+            document.getElementById('status-modal').classList.add('active');
+        }
+
+    </script>
 </body>
 </html>
