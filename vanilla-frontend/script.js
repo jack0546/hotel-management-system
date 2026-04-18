@@ -25,7 +25,34 @@ document.addEventListener('DOMContentLoaded', () => {
         db.collection('bookings').onSnapshot((snapshot) => {
             globalBookings = snapshot.size;
             let roomRevenue = 0;
-            snapshot.forEach(doc => { if(doc.data().totalPaid) roomRevenue += Number(doc.data().totalPaid); });
+            let tableHTML = '';
+            
+            let docs = [];
+            snapshot.forEach(doc => docs.push(doc.data()));
+            docs.sort((a,b) => {
+               const tA = a.timestamp ? a.timestamp.toMillis() : 0;
+               const tB = b.timestamp ? b.timestamp.toMillis() : 0;
+               return tB - tA; // Sort Descending
+            });
+            
+            docs.forEach(d => {
+                if(d.totalPaid) roomRevenue += Number(d.totalPaid); 
+                
+                const statusColor = (d.status && d.status.includes('Unpaid')) ? '#ef4444' : '#22c55e';
+                tableHTML += `
+                    <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.3s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 15px; font-weight: bold; color: var(--text-main);">${d.guestName || 'Anonymous Guest'}</td>
+                        <td style="padding: 15px;">${d.roomType || 'Walk-In'}</td>
+                        <td style="padding: 15px; font-size: 13px;">${d.checkin || '-'} to ${d.checkout || '-'}</td>
+                        <td style="padding: 15px; font-weight:bold; color: ${statusColor};">${d.status || 'Paid'}</td>
+                        <td style="padding: 15px; font-weight:bold;">GHS ${d.totalPaid ? parseFloat(d.totalPaid).toFixed(2) : '0.00'}</td>
+                    </tr>
+                `;
+            });
+            
+            const tableBody = document.getElementById('bookings-table-body');
+            if(tableBody) tableBody.innerHTML = tableHTML || '<tr><td colspan="5" style="padding: 15px; text-align:center;">No bookings found yet.</td></tr>';
+            
             updateDashboard(globalBookings, roomRevenue);
         });
 
@@ -33,8 +60,35 @@ document.addEventListener('DOMContentLoaded', () => {
         let orderRevenue = 0;
         db.collection('orders').onSnapshot((snapshot) => {
             orderRevenue = 0;
-            snapshot.forEach(doc => { if(doc.data().totalPaid) orderRevenue += Number(doc.data().totalPaid); });
-            updateDashboard(globalBookings, orderRevenue); // Update DOM using current globals
+            let tableHTML = '';
+            
+            let docs = [];
+            snapshot.forEach(doc => docs.push(doc.data()));
+            docs.sort((a,b) => {
+               const tA = a.timestamp ? a.timestamp.toMillis() : 0;
+               const tB = b.timestamp ? b.timestamp.toMillis() : 0;
+               return tB - tA; // Sort Descending
+            });
+            
+            docs.forEach(d => {
+                if(d.totalPaid) orderRevenue += Number(d.totalPaid); 
+                
+                const statusColor = (d.status && d.status.includes('Unpaid')) ? '#f59e0b' : '#22c55e';
+                tableHTML += `
+                    <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.3s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 15px; font-weight: bold; color: var(--text-main);">${d.guestName || 'Walk-in'}</td>
+                        <td style="padding: 15px;">${d.quantity || 1}x ${d.item || 'Custom Order'}</td>
+                        <td style="padding: 15px; font-weight: 500;">${d.roomTarget || 'Lobby'}</td>
+                        <td style="padding: 15px; font-weight:bold; color: ${statusColor};">${d.status || 'Paid'}</td>
+                        <td style="padding: 15px; font-weight:bold;">GHS ${d.totalPaid ? parseFloat(d.totalPaid).toFixed(2) : '0.00'}</td>
+                    </tr>
+                `;
+            });
+            
+            const tableBody = document.getElementById('orders-table-body');
+            if(tableBody) tableBody.innerHTML = tableHTML || '<tr><td colspan="5" style="padding: 15px; text-align:center;">No restaurant orders yet.</td></tr>';
+
+            updateDashboard(globalBookings, orderRevenue); 
         });
 
         function updateDashboard(activeBookings, additionalRevenue) {

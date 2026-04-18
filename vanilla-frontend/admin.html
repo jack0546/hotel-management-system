@@ -81,10 +81,46 @@
                     </div>
                 </div>
 
-                <!-- Guests View -->
+                <!-- Live Guests & Orders Data View -->
                 <div id="guests" class="view hidden">
-                    <div class="guests-container glass">
-                        <h2>Guest Management Dashboard - Coming Soon</h2>
+                    <div class="guests-container glass" style="margin-bottom: 25px; padding: 25px;">
+                        <h2 style="color:var(--hotel-primary); margin-bottom: 15px;">Hotel Room Bookings</h2>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; color: #64748b;">
+                                        <th style="padding: 12px;">Guest Name</th>
+                                        <th style="padding: 12px;">Room</th>
+                                        <th style="padding: 12px;">Check-in / Out</th>
+                                        <th style="padding: 12px;">Status</th>
+                                        <th style="padding: 12px;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookings-table-body">
+                                    <tr><td colspan="5" style="padding: 20px; text-align:center;">Loading Live Google Cloud Data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="guests-container glass" style="padding: 25px;">
+                        <h2 style="color:var(--hotel-primary); margin-bottom: 15px;">Restaurant & Bar Orders</h2>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; color: #64748b;">
+                                        <th style="padding: 12px;">Guest Name</th>
+                                        <th style="padding: 12px;">Item Ordered</th>
+                                        <th style="padding: 12px;">Target Room</th>
+                                        <th style="padding: 12px;">Status</th>
+                                        <th style="padding: 12px;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-table-body">
+                                    <tr><td colspan="5" style="padding: 20px; text-align:center;">Loading Live Google Cloud Data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
