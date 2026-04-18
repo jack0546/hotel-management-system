@@ -45,20 +45,17 @@
         .hero p { font-size: 22px; max-width: 600px; margin-bottom: 40px; color: #e0e7ff; text-shadow: 1px 1px 5px rgba(0,0,0,0.5); }
 
         .tabs-wrapper {
-            max-width: 1200px; margin: -35px auto 30px auto; display: flex; justify-content: center;
-            gap: 10px; flex-wrap: wrap; padding: 0 20px; z-index: 10; position: relative;
+            display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; align-items: center; flex: 1; width: 100%;
         }
         .tab-btn {
-            background: rgba(255, 255, 255, 0.9); border: 2px solid #e2e8f0; padding: 12px 25px; border-radius: 30px; font-size: 16px;
-            font-weight: bold; color: var(--hotel-dark); cursor: pointer; transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Outfit'; flex: 1; min-width: 120px; max-width: 250px;
-            backdrop-filter: blur(5px);
+            background: transparent; border: none; padding: 5px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 600; color: rgba(255, 255, 255, 0.7); cursor: pointer; transition: all 0.3s;
+            font-family: 'Outfit'; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); border-bottom: 2px solid transparent; min-width: 0; max-width: none;
         }
         .tab-btn.active {
-            background: linear-gradient(135deg, var(--hotel-primary), var(--hotel-accent)); color: white; border-color: transparent;
-            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4);
+            color: #ffffff; border-bottom: 2px solid var(--hotel-accent);
         }
-        .tab-btn:hover:not(.active) { transform: translateY(-3px); border-color: var(--hotel-primary); }
+        .tab-btn:hover:not(.active) { color: #ffffff; transform: translateY(-2px); }
 
         .tab-content { display: none; animation: fadeIn 0.4s ease-in-out; }
         .tab-content.active { display: block; }
@@ -132,7 +129,7 @@
         .hotel-footer p { margin: 5px 0; font-size: 15px; color: #cbd5e1; }
 
         /* Top Auth Navigation */
-        .top-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 50px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .top-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 50px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; gap: 20px; flex-wrap: wrap; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
         .top-nav .logo { color: white; font-size: 26px; font-weight: bold; text-shadow: 1px 1px 10px rgba(0,0,0,0.6); }
         .top-nav .nav-links { display: flex; align-items: center; gap: 25px; }
         .nav-link { color: white; text-decoration: none; font-weight: 500; font-size: 17px; text-shadow: 1px 1px 5px rgba(0,0,0,0.6); transition: opacity 0.3s; }
@@ -158,8 +155,20 @@
 
     <!-- TOP NAVIGATION BAR -->
     <header class="top-nav">
-        <div class="logo">Aidenh Apartments</div>
-        <div class="nav-links" id="nav-container">
+        <div class="logo" style="flex-shrink: 0;">Aidenh Apartments</div>
+        
+        <!-- HEADER TABS -->
+        <div class="tabs-wrapper">
+            <button class="tab-btn active" onclick="switchTab('tab-home', this)">HOME</button>
+            <button class="tab-btn" onclick="switchTab('tab-rooms', this)">ROOMS</button>
+            <button class="tab-btn" onclick="switchTab('tab-leisure', this)">LEISURE</button>
+            <button class="tab-btn" onclick="switchTab('tab-gallery', this)">GALLERY</button>
+            <button class="tab-btn" onclick="switchTab('tab-conference', this)">CONFERENCE & EVENTS</button>
+            <button class="tab-btn" onclick="switchTab('tab-restaurant', this)">RESTAURANT & BAR</button>
+            <button class="tab-btn" onclick="switchTab('tab-contact', this)">CONTACT</button>
+        </div>
+
+        <div class="nav-links" id="nav-container" style="flex-shrink: 0;">
             <a href="login.html" class="nav-link">Log In</a>
             <a href="login.html" class="nav-btn">Sign Up</a>
         </div>
@@ -168,17 +177,6 @@
     <div class="hero">
         <h1>Aidenh Apartments</h1>
         <p>Two Streams - Mangoase Junction, Koforidua. Experience luxury living with seamless reservations.</p>
-    </div>
-
-    <!-- TABS -->
-    <div class="tabs-wrapper">
-        <button class="tab-btn active" onclick="switchTab('tab-home', this)">HOME</button>
-        <button class="tab-btn" onclick="switchTab('tab-rooms', this)">ROOMS</button>
-        <button class="tab-btn" onclick="switchTab('tab-leisure', this)">LEISURE</button>
-        <button class="tab-btn" onclick="switchTab('tab-gallery', this)">GALLERY</button>
-        <button class="tab-btn" onclick="switchTab('tab-conference', this)">CONFERENCE & EVENTS</button>
-        <button class="tab-btn" onclick="switchTab('tab-restaurant', this)">RESTAURANT & BAR</button>
-        <button class="tab-btn" onclick="switchTab('tab-contact', this)">CONTACT</button>
     </div>
 
     <!-- HOME TAB -->
