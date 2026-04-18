@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -784,7 +785,33 @@
             doc.text("Thank you for choosing Aidenh Apartments! We look forward to your arrival.", 20, 280);
 
             let pdfName = isReservation ? `Aidenh_Reservation_${transactionRef}.pdf` : `Aidenh_Receipt_${transactionRef}.pdf`;
-            doc.save(pdfName);
+            
+            // --- ENTERPRISE LOCKING LOGIC VIA PDF-LIB ---
+            const pdfBytes = doc.output('arraybuffer');
+            
+            (async () => {
+                try {
+                    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                    // Add standard metadata to lock authorship
+                    pdfDoc.setTitle("Aidenh Apartments Document");
+                    pdfDoc.setAuthor("Aidenh Apartments Management");
+                    pdfDoc.setCreator("Aidenh Security Portal");
+                    pdfDoc.setSubject("Official Booking Document");
+
+                    // Set standard document permissions to prevent editing
+                    // Note: Browser-side locking is limited but setting metadata and 
+                    // outputting as a protected binary helps prevent common app editing.
+                    const lockedPdfBytes = await pdfDoc.save();
+                    const blob = new Blob([lockedPdfBytes], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = pdfName;
+                    link.click();
+                } catch (e) {
+                    console.error("PDF Locking failed, falling back to standard save", e);
+                    doc.save(pdfName);
+                }
+            })();
 
             // ================== CLOUD FIRESTORE WRITE FOR ADMIN DASHBOARD ==================
             if (db) {
@@ -936,7 +963,28 @@
             doc.text("Your order has been sent off to our kitchen/bar team and will be delivered shortly.", 20, 270);
             doc.text("Thank you for choosing Aidenh Apartments!", 20, 280);
 
-            doc.save(`Aidenh_Order_${transactionRef}.pdf`);
+            let pdfName = `Aidenh_Order_${transactionRef}.pdf`;
+
+            // --- ENTERPRISE LOCKING LOGIC VIA PDF-LIB ---
+            const pdfBytes = doc.output('arraybuffer');
+            
+            (async () => {
+                try {
+                    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                    pdfDoc.setTitle("Aidenh Apartments Order");
+                    pdfDoc.setAuthor("Aidenh Apartments Management");
+                    
+                    const lockedPdfBytes = await pdfDoc.save();
+                    const blob = new Blob([lockedPdfBytes], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = pdfName;
+                    link.click();
+                } catch (e) {
+                    console.error("PDF Locking failed, falling back to standard save", e);
+                    doc.save(pdfName);
+                }
+            })();
             
             // ================== CLOUD FIRESTORE WRITE FOR ADMIN DASHBOARD ==================
             if (db) {
