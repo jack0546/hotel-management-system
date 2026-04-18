@@ -569,33 +569,76 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // --- SEARCH LOGIC ---
-        function executeSearch() {
+        // --- ENHANCED LIVE AVAILABILITY SEARCH LOGIC ---
+        async function executeSearch() {
             const requestedGuests = parseInt(document.getElementById('guests-count').value);
-            const validRooms = RAW_ROOMS.filter(r => r.cap >= requestedGuests);
-            const roomsContainer = document.getElementById('rooms-container');
+            const reqCheckin = new Date(document.getElementById('checkin').value);
+            const reqCheckout = new Date(document.getElementById('checkout').value);
             
+            const roomsContainer = document.getElementById('rooms-container');
+            const results = document.getElementById('search-results');
+            
+            roomsContainer.innerHTML = '<h3 style="grid-column: 1/-1; text-align: center; color: var(--hotel-primary);">Checking live cloud availability...</h3>';
+            results.classList.remove('hidden');
+
+            // 1. Ask Google Firestore for all bookings overlapping our requested dates
+            let bookedRooms = new Set();
+            if(typeof db !== 'undefined') {
+                try {
+                    const snap = await db.collection('bookings').get();
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        if(data.roomType && data.checkin && data.checkout) {
+                            const bIn = new Date(data.checkin);
+                            const bOut = new Date(data.checkout);
+                            
+                            // Mathematics for Date Overlap Analysis (Strict overlap check)
+                            if (reqCheckin < bOut && reqCheckout > bIn) {
+                                bookedRooms.add(data.roomType);
+                            }
+                        }
+                    });
+                } catch(e) {
+                    console.error("Firestore availability check error:", e);
+                }
+            }
+
+            // 2. Filter capacities first
+            const validRooms = RAW_ROOMS.filter(r => r.cap >= requestedGuests);
             roomsContainer.innerHTML = ''; 
+            
             if(validRooms.length === 0) {
                 roomsContainer.innerHTML = '<h3 style="grid-column: 1/-1; text-align: center; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 10px;">No rooms available for a group this large. Please consider multiple bookings.</h3>';
             } else {
                 validRooms.forEach(room => {
+                    const isBooked = bookedRooms.has(room.name);
+                    
+                    // High-quality Status Badges
+                    const availabilityBadge = isBooked 
+                        ? `<span style="background: #fee2e2; color: #dc2626; border: 1px solid #f87171; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; margin-bottom: 15px; display: inline-block;">🚨 ALREADY BOOKED</span>`
+                        : `<span style="background: #dcfce7; color: #16a34a; border: 1px solid #4ade80; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; margin-bottom: 15px; display: inline-block;">✅ AVAILABLE</span>`;
+                    
+                    const buttonHTML = isBooked
+                        ? `<button class="action-btn" style="background: #94a3b8; cursor: not-allowed;" title="Dates Overlapped" disabled>Unavailable for Dates</button>`
+                        : `<button class="action-btn" onclick="openBookingModal('${room.name}', ${room.price})">Book This Room</button>`;
+                        
+                    const styleMod = isBooked ? `opacity: 0.75; filter: grayscale(30%);` : ``;
+
                     roomsContainer.innerHTML += `
-                        <div class="card">
+                        <div class="card" style="${styleMod}">
                             <img src="${room.img}?auto=format&fit=crop&q=80" alt="${room.name}">
                             <div class="card-content">
                                 <h3>${room.name}</h3>
-                                <p class="desc" style="margin-bottom: 5px;">${room.desc}</p>
+                                ${availabilityBadge}
+                                <p class="desc" style="margin-bottom: 10px;">${room.desc}</p>
                                 <span class="capacity">Accommodates up to ${room.cap} People</span>
                                 <span class="price" style="margin-top: auto;">GHS ${room.price.toFixed(2)} <span style="font-size:14px;font-weight:normal;color:#64748b">/ night</span></span>
-                                <button class="action-btn" onclick="openBookingModal('${room.name}', ${room.price})">Book This Room</button>
+                                ${buttonHTML}
                             </div>
                         </div>
                     `;
                 });
             }
-            const results = document.getElementById('search-results');
-            results.classList.remove('hidden');
         }
 
         // =========================================================
