@@ -128,6 +128,17 @@
         .hotel-footer h2 { margin: 0 0 15px 0; font-size: 28px; color: #e0e7ff; }
         .hotel-footer p { margin: 5px 0; font-size: 15px; color: #cbd5e1; }
 
+        /* Floating WhatsApp */
+        .floating-wa {
+            position: fixed; bottom: 30px; right: 30px; background: #25D366; color: white;
+            width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 38px; box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5); z-index: 1000;
+            cursor: pointer; text-decoration: none; transition: transform 0.3s ease;
+        }
+        .floating-wa:hover {
+            transform: scale(1.1); color: white;
+        }
+
         /* Top Auth Navigation */
         .top-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 50px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; gap: 20px; flex-wrap: wrap; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
         .top-nav .logo { color: white; font-size: 26px; font-weight: bold; text-shadow: 1px 1px 10px rgba(0,0,0,0.6); }
@@ -294,11 +305,19 @@
             <p style="font-size: 18px; margin-bottom: 15px;"><strong>📞 Phone:</strong> 059 918 1742</p>
             <p style="font-size: 18px; margin-bottom: 15px;"><strong>✉️ Email:</strong> reservations@aidenhapartments.com</p>
             <p style="font-size: 18px; margin-bottom: 15px;"><strong>🌐 Website:</strong> www.aidenhapartments.com</p>
-            <div style="margin-top: 30px; text-align: center;">
-                <button class="book-btn" onclick="window.location.href='mailto:reservations@aidenhapartments.com'">Send an Email Fast</button>
+            <div style="margin-top: 30px; text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="book-btn" style="flex: 1; min-width: 200px;" onclick="window.location.href='mailto:reservations@aidenhapartments.com'">Send an Email</button>
+                <button class="book-btn" style="flex: 1; min-width: 200px; background: #25D366; border: none; box-shadow: 0 5px 15px rgba(37,211,102,0.4);" onclick="window.open('https://wa.me/233599181742?text=Hello%20Aidenh%20Apartments!%20I%20want%20to%20make%20an%20inquiry.', '_blank')">
+                    <ion-icon name="logo-whatsapp" style="vertical-align: middle; font-size: 20px; margin-right: 5px;"></ion-icon> WhatsApp Us
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- FLOATING WHATSAPP ICON -->
+    <a href="https://wa.me/233599181742?text=Hello%20Aidenh%20Apartments!%20I%20want%20to%20make%20an%20inquiry." class="floating-wa" target="_blank" title="Chat with us on WhatsApp">
+        <ion-icon name="logo-whatsapp"></ion-icon>
+    </a>
 
 
     <!-- ROOM BOOKING PAYSTACK MODAL WITH 'RESERVE ONLY' FEATURE -->
