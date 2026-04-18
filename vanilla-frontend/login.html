@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aidenh Apartments - Secure Login</title>
+    
+    <!-- Firebase Libraries (using compact mode for Vanilla JS) -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hotel-dark: #1e1b4b;
+            --hotel-primary: #4f46e5;
+            --hotel-accent: #818cf8;
+            --bg-color: #f8fafc;
+        }
+        
+        body { 
+            margin: 0; padding: 0; font-family: 'Outfit', sans-serif; 
+            background: url('BG.webp') center center / cover no-repeat fixed; 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%; max-width: 450px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.5);
+            box-sizing: border-box;
+        }
+
+        .auth-container h2 {
+            color: var(--hotel-dark); margin-top: 0; font-size: 32px; margin-bottom: 5px;
+        }
+        .auth-container p { color: #64748b; margin-bottom: 25px; }
+
+        .auth-tabs {
+            display: flex; background: rgba(0,0,0,0.05); border-radius: 10px; padding: 5px; margin-bottom: 25px;
+        }
+        .auth-tabs button {
+            flex: 1; border: none; padding: 10px; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; background: transparent; cursor: pointer; transition: all 0.3s;
+        }
+        .auth-tabs button.active {
+            background: white; color: var(--hotel-primary); box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; color: var(--hotel-dark); font-weight: 600; margin-bottom: 5px; font-size: 14px;}
+        .input-group input {
+            width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: 'Outfit'; font-size: 16px; outline: none; transition: 0.3s;
+        }
+        .input-group input:focus { border-color: var(--hotel-primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; font-family: 'Outfit'; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--hotel-primary), var(--hotel-accent)); color: white; margin-top: 10px;}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4); }
+
+        .btn-google { background: white; color: #333; border: 1px solid #cbd5e1; margin-top: 15px; }
+        .btn-google:hover { background: #f8fafc; }
+        .btn-google img { width: 20px; }
+
+        .divider { display: flex; align-items: center; margin: 20px 0; color: #94a3b8; font-size: 14px; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #cbd5e1; margin: 0 10px; }
+
+        .hidden { display: none !important; }
+
+        .toggle-link { color: var(--hotel-primary); font-weight: bold; cursor: pointer; text-decoration: underline; font-size: 14px;}
+        #recaptcha-container { margin-bottom: 15px; display: flex; justify-content: center; }
+
+        #error-message { color: #ef4444; background: #fee2e2; padding: 10px; border-radius: 8px; font-size: 14px; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <h2>Aidenh Apartments</h2>
+        <p>Guest Access Portal</p>
+
+        <div id="error-message"></div>
+
+        <div class="auth-tabs">
+            <button id="tab-email" class="active" onclick="switchAuthMethod('email')">Email</button>
+            <button id="tab-phone" onclick="switchAuthMethod('phone')">Phone SMS</button>
+        </div>
+
+        <!-- EMAIL VIEW -->
+        <div id="view-email">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="john@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+            
+            <button class="btn btn-primary" id="email-action-btn" onclick="handleEmailAuth()">Sign In</button>
+            
+            <div style="margin-top: 15px; font-size: 14px;">
+                <span id="email-prompt-text">Don't have an account?</span> 
+                <span class="toggle-link" onclick="toggleEmailMode()">Sign Up Here</span>
+            </div>
+
+            <div class="divider">OR</div>
+
+            <button class="btn btn-google" onclick="signInWithGoogle()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Continue with Google
+            </button>
+        </div>
+
+        <!-- PHONE SMS VIEW -->
+        <div id="view-phone" class="hidden">
+            <div id="phone-step-1">
+                <div class="input-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="phoneNumber" placeholder="+233 59 918 1742">
+                </div>
+                <div id="recaptcha-container"></div>
+                <button class="btn btn-primary" onclick="sendSMSCode()">Send Verification Code</button>
+            </div>
+
+            <div id="phone-step-2" class="hidden">
+                <div class="input-group">
+                    <label>Enter 6-Digit SMS Code</label>
+                    <input type="text" id="smsCode" placeholder="123456" maxlength="6">
+                </div>
+                <button class="btn btn-primary" onclick="verifySMSCode()">Verify & Login</button>
+                <div style="margin-top: 10px;">
+                    <span class="toggle-link" onclick="resetPhoneAuth()">Wrong number? Go back</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // -------------------------------------------------------------
+        // IMPORTANT: YOU MUST ADD YOUR FIREBASE CONFIGURATION KEYS HERE
+        // -------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8BoL8yfKIQ2o-tVmbrVfx0TXcUvudzyY",
+            authDomain: "project-3cccff25-b1fb-4aa9-978.firebaseapp.com",
+            projectId: "project-3cccff25-b1fb-4aa9-978",
+            storageBucket: "project-3cccff25-b1fb-4aa9-978.firebasestorage.app",
+            messagingSenderId: "1009826575246",
+            appId: "1:1009826575246:web:595912191007526e5deadf"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+
+        // -------------------------------------------------------------
+        // UI TOGGLE LOGIC
+        // -------------------------------------------------------------
+        let currentAuthMode = 'email'; // 'email', 'phone'
+        let currentEmailAction = 'signin'; // 'signin', 'signup'
+        
+        function showError(msg) {
+            const errBox = document.getElementById('error-message');
+            errBox.textContent = msg;
+            errBox.style.display = 'block';
+            setTimeout(() => { errBox.style.display = 'none'; }, 5000); // Hide after 5s
+        }
+
+        function switchAuthMethod(method) {
+            document.getElementById('view-email').classList.add('hidden');
+            document.getElementById('view-phone').classList.add('hidden');
+            document.getElementById('tab-email').classList.remove('active');
+            document.getElementById('tab-phone').classList.remove('active');
+            
+            document.getElementById('view-' + method).classList.remove('hidden');
+            document.getElementById('tab-' + method).classList.add('active');
+            
+            currentAuthMode = method;
+            if(method === 'phone') { initRecaptcha(); }
+        }
+
+        function toggleEmailMode() {
+            if(currentEmailAction === 'signin') {
+                currentEmailAction = 'signup';
+                document.getElementById('email-action-btn').textContent = "Create Account";
+                document.getElementById('email-prompt-text').textContent = "Already have an account?";
+                document.querySelector('.toggle-link').textContent = "Log In Here";
+            } else {
+                currentEmailAction = 'signin';
+                document.getElementById('email-action-btn').textContent = "Sign In";
+                document.getElementById('email-prompt-text').textContent = "Don't have an account?";
+                document.querySelector('.toggle-link').textContent = "Sign Up Here";
+            }
+        }
+
+        // -------------------------------------------------------------
+        // FIREBASE EMAIL / PASSWORD AUTH
+        // -------------------------------------------------------------
+        function handleEmailAuth() {
+            const eml = document.getElementById('email').value;
+            const pwd = document.getElementById('password').value;
+            
+            if(!eml || !pwd) return showError('Please fill out both email and password.');
+
+            if(currentEmailAction === 'signin') {
+                auth.signInWithEmailAndPassword(eml, pwd)
+                    .then(loginSuccess)
+                    .catch(err => showError(err.message));
+            } else {
+                auth.createUserWithEmailAndPassword(eml, pwd)
+                    .then(loginSuccess)
+                    .catch(err => showError(err.message));
+            }
+        }
+
+        // -------------------------------------------------------------
+        // FIREBASE GOOGLE AUTH (OAUTH)
+        // -------------------------------------------------------------
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(loginSuccess)
+                .catch(err => showError(err.message));
+        }
+
+        // -------------------------------------------------------------
+        // FIREBASE PHONE SMS AUTH
+        // -------------------------------------------------------------
+        let confirmationResultObj = null;
+        let recaptchaVerifier = null;
+
+        function initRecaptcha() {
+            if(!recaptchaVerifier) {
+                recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    'size': 'normal',
+                    'callback': (response) => { console.log('Recaptcha solved'); }
+                });
+                recaptchaVerifier.render();
+            }
+        }
+
+        function sendSMSCode() {
+            const phoneStr = document.getElementById('phoneNumber').value;
+            if(!phoneStr) return showError("Please enter a valid phone number (e.g. +233599181742).");
+            
+            auth.signInWithPhoneNumber(phoneStr, recaptchaVerifier)
+                .then((confirmationResult) => {
+                    confirmationResultObj = confirmationResult;
+                    document.getElementById('phone-step-1').classList.add('hidden');
+                    document.getElementById('phone-step-2').classList.remove('hidden');
+                }).catch((error) => {
+                    showError(error.message);
+                });
+        }
+
+        function verifySMSCode() {
+            const code = document.getElementById('smsCode').value;
+            if(!code || !confirmationResultObj) return showError("Please enter the 6-digit code.");
+
+            confirmationResultObj.confirm(code).then(loginSuccess).catch((error) => {
+                showError("Invalid Code: " + error.message);
+            });
+        }
+
+        function resetPhoneAuth() {
+            document.getElementById('phone-step-2').classList.add('hidden');
+            document.getElementById('phone-step-1').classList.remove('hidden');
+            document.getElementById('smsCode').value = '';
+        }
+
+        // -------------------------------------------------------------
+        // SUCCESS HANDLER
+        // -------------------------------------------------------------
+        function loginSuccess(userCredential) {
+            console.log("Logged in successfully:", userCredential.user);
+            // Redirect user directly to the Guest Website Portal!
+            window.location.href = "guest-landing.html";
+        }
+        
+    </script>
+</body>
+</html>

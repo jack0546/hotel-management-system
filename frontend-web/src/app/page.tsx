@@ -1,0 +1,181 @@
+'use client';
+import { useState } from 'react';
+import { CalendarDays, Coffee, Users, Search, Bell, Bot } from 'lucide-react';
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  return (
+    <div className="flex h-screen bg-slate-50">
+      {/* Sidebar */}
+      <aside className="w-64 bg-hotel-dark text-white p-6 shadow-2xl z-10 transition-all">
+        <div className="flex items-center gap-3 mb-10">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-hotel-primary to-hotel-secondary flex items-center justify-center font-bold text-xl shadow-lg">
+            H
+          </div>
+          <h1 className="text-xl font-bold tracking-tight">SmartHotel AI</h1>
+        </div>
+        
+        <nav className="space-y-4">
+          <SidebarItem icon={<CalendarDays />} label="Dashboard" active={activeTab==='dashboard'} onClick={() => setActiveTab('dashboard')} />
+          <SidebarItem icon={<Search />} label="Rooms" active={activeTab==='rooms'} onClick={() => setActiveTab('rooms')} />
+          <SidebarItem icon={<Users />} label="Guests" active={activeTab==='guests'} onClick={() => setActiveTab('guests')} />
+          <SidebarItem icon={<Coffee />} label="Restaurant POS" active={activeTab==='pos'} onClick={() => setActiveTab('pos')} />
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto relative">
+        <header className="glass sticky top-0 z-10 flex justifying-between items-center px-10 py-4">
+          <h2 className="text-2xl font-bold text-slate-800 capitalize">{activeTab}</h2>
+          <div className="flex items-center gap-4">
+            <button className="p-2 rounded-full hover:bg-slate-100 transition"><Bell className="text-slate-600" /></button>
+            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
+              <div className="w-8 h-8 rounded-full bg-hotel-primary text-white flex items-center justify-center font-bold text-sm">A</div>
+              <span className="font-medium text-slate-700 text-sm">Super Admin</span>
+            </div>
+          </div>
+        </header>
+
+        <div className="p-10">
+          {activeTab === 'dashboard' && <DashboardView />}
+          {activeTab === 'rooms' && <RoomsView />}
+          {activeTab === 'guests' && <GuestsView />}
+          {activeTab === 'pos' && <POSView />}
+        </div>
+
+        {/* AI Assistant FAB */}
+        <button 
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-hotel-primary to-hotel-secondary rounded-full shadow-2xl flex items-center justify-center text-white hover:scale-105 transition-transform">
+          <Bot size={32} />
+        </button>
+
+        {isChatOpen && (
+          <div className="fixed bottom-28 right-8 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col z-50">
+            <div className="bg-hotel-dark p-4 text-white flex gap-3 items-center">
+              <Bot />
+              <h3 className="font-bold">AI Assistant</h3>
+            </div>
+            <div className="p-4 h-64 overflow-y-auto bg-slate-50 flex flex-col gap-3">
+              <div className="bg-hotel-light text-hotel-dark p-3 rounded-lg rounded-tl-none w-11/12 text-sm">
+                Hello! I can help you manage bookings, check room status, or process POS orders. How can I assist you today?
+              </div>
+            </div>
+            <div className="p-3 border-t bg-white flex gap-2">
+              <input type="text" placeholder="Type a message..." className="flex-1 px-3 py-2 border rounded-full text-sm outline-none focus:border-hotel-primary" />
+              <button className="bg-hotel-primary text-white px-4 py-2 rounded-full text-sm font-medium">Send</button>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+function SidebarItem({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all ${active ? 'bg-hotel-primary text-white shadow-lg' : 'text-hotel-accent hover:bg-white/10'}`}>
+      {icon}
+      <span className="font-medium">{label}</span>
+    </button>
+  );
+}
+
+// Sub-components
+function DashboardView() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <StatCard title="Total Rooms" value="120" />
+        <StatCard title="Occupancy Rate" value="78%" />
+        <StatCard title="Daily Revenue" value="$4,250" />
+        <StatCard title="Active Bookings" value="45" />
+      </div>
+      <div className="glass rounded-2xl p-6 mt-8 h-96 flex items-center justify-center shadow-sm">
+        <p className="text-slate-500 font-medium text-lg">Revenue Chart Placeholder</p>
+      </div>
+    </div>
+  )
+}
+
+function StatCard({ title, value }: { title: string, value: string }) {
+  return (
+    <div className="glass p-6 rounded-2xl border-t-4 border-t-hotel-primary hover:-translate-y-1 transition-transform cursor-pointer">
+      <h3 className="text-slate-500 font-medium text-sm mb-2">{title}</h3>
+      <p className="text-4xl font-bold text-slate-800">{value}</p>
+    </div>
+  )
+}
+
+function GuestsView() {
+  return (
+    <div className="glass p-10 rounded-2xl flex items-center justify-center">
+      <p className="text-slate-500 font-bold text-xl">Guest Management Dashboard - Coming Soon</p>
+    </div>
+  )
+}
+
+function RoomsView() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {[101, 102, 103, 104, 201, 202].map(room => (
+        <div key={room} className="glass rounded-xl overflow-hidden shadow-sm group">
+          <div className="h-40 bg-slate-200 relative">
+            {/* Image Placeholder */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+              <span className="text-white font-bold text-xl">Room {room}</span>
+            </div>
+            <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md">Available</div>
+          </div>
+          <div className="p-5">
+            <h4 className="font-bold text-slate-800">Deluxe Suite</h4>
+            <div className="flex justify-between items-center mt-4">
+              <p className="text-hotel-primary font-bold text-lg">$150<span className="text-sm font-normal text-slate-500">/night</span></p>
+              <button className="bg-hotel-dark text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-hotel-primary transition">Book Now</button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function POSView() {
+  return (
+    <div className="flex gap-6 h-[80vh]">
+      <div className="flex-1 glass rounded-2xl p-6 overflow-y-auto">
+        <h3 className="font-bold text-xl mb-6">Menu Items</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[1,2,3,4,5,6].map(i => (
+            <div key={i} className="border p-4 rounded-xl hover:shadow-md cursor-pointer transition bg-white text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-full mx-auto mb-3"></div>
+              <h4 className="font-medium">Burger Combo {i}</h4>
+              <p className="text-hotel-primary font-bold mt-1">$12.00</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="w-80 glass rounded-2xl p-6 flex flex-col">
+        <h3 className="font-bold text-xl mb-4">Current Order</h3>
+        <div className="flex-1 overflow-y-auto space-y-3">
+          <div className="flex justify-between text-sm items-center p-2 bg-slate-50 rounded">
+            <span>2x Burger Combo 1</span>
+            <span className="font-bold">$24.00</span>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t space-y-2">
+          <div className="flex justify-between font-bold text-lg">
+            <span>Total</span>
+            <span>$24.00</span>
+          </div>
+          <button className="w-full bg-hotel-primary text-white py-3 rounded-xl font-bold mt-4 hover:shadow-lg transition">Charge to Room</button>
+          <button className="w-full bg-hotel-dark text-white py-3 rounded-xl font-bold hover:shadow-lg transition">Pay Now</button>
+        </div>
+      </div>
+    </div>
+  )
+}
