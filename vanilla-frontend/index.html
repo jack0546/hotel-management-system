@@ -813,6 +813,18 @@
                 }
             })();
 
+            if (!isChargedToRoom) {
+                const msg = `🍔 NEW FOOD/DRINK ORDER - AIDENH APARTMENTS\n\nCustomer: ${guestName}\nOrder: ${itemState.qty}x ${itemState.itemName}\nLocation: ${roomLocation}\nTotal Paid: GHS ${itemState.total.toFixed(2)}\nRef: ${transactionRef}`;
+                const waUrl = `https://wa.me/233599181742?text=${encodeURIComponent(msg)}`;
+                setTimeout(() => { window.open(waUrl, '_blank'); }, 2000);
+            }
+
+            if (!isReservation) {
+                const msg = `🚨 NEW PAYMENT RECEIVED - AIDENH APARTMENTS\n\nGuest: ${guestName}\nRoom: ${bookingState.roomName}\nTotal Paid: GHS ${bookingState.total.toFixed(2)}\nDates: ${bookingState.checkinDate} to ${bookingState.checkoutDate}\nRef: ${transactionRef}`;
+                const waUrl = `https://wa.me/233599181742?text=${encodeURIComponent(msg)}`;
+                setTimeout(() => { window.open(waUrl, '_blank'); }, 2000);
+            }
+
             // ================== CLOUD FIRESTORE WRITE FOR ADMIN DASHBOARD ==================
             if (db) {
                 db.collection('bookings').add({
