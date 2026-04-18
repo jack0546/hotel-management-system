@@ -172,14 +172,25 @@
 
     <!-- TABS -->
     <div class="tabs-wrapper">
-        <button class="tab-btn active" onclick="switchTab('tab-rooms', this)">🏨 Reserve a Room</button>
-        <button class="tab-btn" onclick="switchTab('tab-foods', this)">🍔 Foods</button>
-        <button class="tab-btn" onclick="switchTab('tab-drinks', this)">🍸 Drinks</button>
-        <button class="tab-btn" onclick="switchTab('tab-water', this)">💧 Premium Water</button>
+        <button class="tab-btn active" onclick="switchTab('tab-home', this)">HOME</button>
+        <button class="tab-btn" onclick="switchTab('tab-rooms', this)">ROOMS</button>
+        <button class="tab-btn" onclick="switchTab('tab-leisure', this)">LEISURE</button>
+        <button class="tab-btn" onclick="switchTab('tab-gallery', this)">GALLERY</button>
+        <button class="tab-btn" onclick="switchTab('tab-conference', this)">CONFERENCE & EVENTS</button>
+        <button class="tab-btn" onclick="switchTab('tab-restaurant', this)">RESTAURANT & BAR</button>
+        <button class="tab-btn" onclick="switchTab('tab-contact', this)">CONTACT</button>
+    </div>
+
+    <!-- HOME TAB -->
+    <div id="tab-home" class="tab-content active section-container">
+        <h2 style="margin-top: 20px;">Welcome to Aidenh Apartments</h2>
+        <p style="font-size:18px; line-height: 1.8; max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.8); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); backdrop-filter: blur(5px);">
+            Experience the perfect blend of modern luxury and homely comfort in the heart of Koforidua. Our premium facilities, serene environment, and world-class hospitality ensure a memorable stay for both business and leisure travelers alike!
+        </p>
     </div>
 
     <!-- ROOMS TAB -->
-    <div id="tab-rooms" class="tab-content active">
+    <div id="tab-rooms" class="tab-content">
         <div class="booking-widget">
             <div class="input-group">
                 <label>Check In (12:00 pm)</label>
@@ -212,22 +223,83 @@
         </div>
     </div>
 
-    <!-- FOODS TAB -->
-    <div id="tab-foods" class="tab-content section-container">
+    <!-- LEISURE TAB -->
+    <div id="tab-leisure" class="tab-content section-container">
+        <h2>Relax & Unwind</h2>
+        <div class="grid">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1576013551627-c02aca44f6fa?w=500&q=80" alt="Pool">
+                <div class="card-content"><h3>Infinity Pool</h3><p class="desc">A crystal clear outdoor pool with lounging areas.</p></div>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&q=80" alt="Spa">
+                <div class="card-content"><h3>Wellness Spa</h3><p class="desc">Premium massage and therapeutic treatments.</p></div>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500&q=80" alt="Gym">
+                <div class="card-content"><h3>Fitness Center</h3><p class="desc">State of the art gym equipment to stay fit.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GALLERY TAB -->
+    <div id="tab-gallery" class="tab-content section-container">
+        <h2>Our Gallery</h2>
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+            <img src="https://images.unsplash.com/photo-1542314831-c6a4d27ce6a2?w=600&q=80" style="width:100%; height:250px; object-fit:cover; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="https://images.unsplash.com/photo-1551882547-ff40c0d129df?w=600&q=80" style="width:100%; height:250px; object-fit:cover; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=600&q=80" style="width:100%; height:250px; object-fit:cover; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&q=80" style="width:100%; height:250px; object-fit:cover; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=600&q=80" style="width:100%; height:250px; object-fit:cover; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=600&q=80" style="width:100%; height:250px; object-fit:cover; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        </div>
+    </div>
+
+    <!-- CONFERENCE & EVENTS TAB -->
+    <div id="tab-conference" class="tab-content section-container">
+        <h2>Conference & Events</h2>
+        <div class="grid">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=500&q=80" alt="Conference">
+                <div class="card-content">
+                    <h3>Executive Meeting Room</h3>
+                    <p class="desc">Equipped with 4K projectors and high-speed Wi-Fi. Seats 20 comfortably.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=500&q=80" alt="Events">
+                <div class="card-content">
+                    <h3>Grand Banquet Hall</h3>
+                    <p class="desc">Perfect for weddings or corporate galas. Seats 150 with a dedicated stage.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESTAURANT & BAR TAB (Merged from Foods, Drinks, Water) -->
+    <div id="tab-restaurant" class="tab-content section-container">
         <h2>In-Room Gourmet Foods</h2>
         <div class="grid" id="foods-container"></div>
-    </div>
-
-    <!-- DRINKS TAB -->
-    <div id="tab-drinks" class="tab-content section-container">
-        <h2>Signature Cocktails & Beverages</h2>
+        
+        <h2 style="margin-top: 40px;">Signature Cocktails & Beverages</h2>
         <div class="grid" id="drinks-container"></div>
+        
+        <h2 style="margin-top: 40px;">Refreshments & Water</h2>
+        <div class="grid" id="water-container"></div>
     </div>
 
-    <!-- WATER TAB -->
-    <div id="tab-water" class="tab-content section-container">
-        <h2>Refreshments & Water</h2>
-        <div class="grid" id="water-container"></div>
+    <!-- CONTACT TAB -->
+    <div id="tab-contact" class="tab-content section-container">
+        <h2>Contact Us</h2>
+        <div style="background: rgba(255,255,255,0.9); padding: 40px; border-radius: 20px; text-align: left; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); backdrop-filter: blur(10px);">
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>📍 Address:</strong> Two Streams - Mangoase Junction, Koforidua (3Q64+52)</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>📞 Phone:</strong> 059 918 1742</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>✉️ Email:</strong> reservations@aidenhapartments.com</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>🌐 Website:</strong> www.aidenhapartments.com</p>
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="book-btn" onclick="window.location.href='mailto:reservations@aidenhapartments.com'">Send an Email Fast</button>
+            </div>
+        </div>
     </div>
 
 
