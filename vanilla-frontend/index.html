@@ -708,7 +708,11 @@
 
         function generatePDF(guestName, guestEmail, transactionRef, isReservation = false) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({
+                encryption: {
+                    userPermissions: ["print", "highResolutionPrint"]
+                }
+            });
             
             doc.setFontSize(24);
             doc.setTextColor(30, 27, 75); 
@@ -857,7 +861,11 @@
 
         function generateItemPDF(guestName, guestEmail, roomLocation, transactionRef, isChargedToRoom = false) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({
+                encryption: {
+                    userPermissions: ["print", "highResolutionPrint"]
+                }
+            });
             
             doc.setFontSize(24);
             doc.setTextColor(30, 27, 75); 
