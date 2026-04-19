@@ -657,6 +657,18 @@
             }
         }
 
+        // --- Initial Load Synchronization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if(document.getElementById('checkin')) {
+                const today = new Date().toISOString().split('T')[0];
+                const tomorrow = new Date(new Date().getTime() + 24*60*60*1000).toISOString().split('T')[0];
+                document.getElementById('checkin').value = today;
+                document.getElementById('checkout').value = tomorrow;
+                // Wait a moment for Firebase to initialize before auto-searching
+                setTimeout(executeSearch, 1500);
+            }
+        });
+
         // =========================================================
         //                 A. ROOM BOOKING LOGIC
         // =========================================================
