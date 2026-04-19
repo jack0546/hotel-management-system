@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aidenh Apartments - Guest Portal</title>
+    <title>Safegold Hotel - Guest Portal</title>
     <!-- Paystack & jsPDF Libraries -->
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -194,7 +194,7 @@
 
     <!-- TOP NAVIGATION BAR -->
     <header class="top-nav">
-        <div class="logo" style="flex-shrink: 0;">Aidenh Apartments</div>
+        <div class="logo" style="flex-shrink: 0;">Safegold Hotel</div>
         
         <!-- HEADER TABS -->
         <div class="tabs-wrapper">
@@ -215,13 +215,13 @@
     </header>
 
     <div class="hero">
-        <h1>Aidenh Apartments</h1>
+        <h1>Safegold Hotel</h1>
         <p>Two Streams - Mangoase Junction, Koforidua. Experience luxury living with seamless reservations.</p>
     </div>
 
     <!-- HOME TAB -->
     <div id="tab-home" class="tab-content active section-container">
-        <h2 style="margin-top: 20px;">Welcome to Aidenh Apartments</h2>
+        <h2 style="margin-top: 20px;">Welcome to Safegold Hotel</h2>
         <p style="font-size:18px; line-height: 1.8; max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.8); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); backdrop-filter: blur(5px);">
             Experience the perfect blend of modern luxury and homely comfort in the heart of Koforidua. Our premium facilities, serene environment, and world-class hospitality ensure a memorable stay for both business and leisure travelers alike!
         </p>
@@ -327,10 +327,10 @@
         <div style="background: rgba(255,255,255,0.9); padding: 40px; border-radius: 20px; text-align: left; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); backdrop-filter: blur(10px);">
             <p style="font-size: 18px; margin-bottom: 15px;"><strong>📍 Address:</strong> Two Streams - Mangoase Junction, Koforidua (3Q64+52)</p>
             <p style="font-size: 18px; margin-bottom: 15px;"><strong>📞 Phone:</strong> 059 918 1742</p>
-            <p style="font-size: 18px; margin-bottom: 15px;"><strong>✉️ Email:</strong> reservations@aidenhapartments.com</p>
-            <p style="font-size: 18px; margin-bottom: 15px;"><strong>🌐 Website:</strong> www.aidenhapartments.com</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>✉️ Email:</strong> reservations@safegoldhotel.com</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>🌐 Website:</strong> www.safegoldhotel.com</p>
             <div style="margin-top: 30px; text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                <button class="book-btn" style="flex: 1; min-width: 200px;" onclick="window.location.href='mailto:reservations@aidenhapartments.com'">Send an Email</button>
+                <button class="book-btn" style="flex: 1; min-width: 200px;" onclick="window.location.href='mailto:reservations@safegoldhotel.com'">Send an Email</button>
                 <button class="book-btn" style="flex: 1; min-width: 200px; background: #25D366; border: none; box-shadow: 0 5px 15px rgba(37,211,102,0.4);" onclick="window.open('https://wa.me/233599181742?text=Hello%20Aidenh%20Apartments!%20I%20want%20to%20make%20an%20inquiry.', '_blank')">
                     <ion-icon name="logo-whatsapp" style="vertical-align: middle; font-size: 20px; margin-right: 5px;"></ion-icon> WhatsApp Us
                 </button>
@@ -496,9 +496,9 @@
 
     <!-- MAIN FOOTER WITH INFO -->
     <footer class="hotel-footer">
-        <h2>Aidenh Apartments</h2>
+        <h2>Safegold Hotel</h2>
         <p>Two Streams - Mangoase Junction, Koforidua (3Q64+52)</p>
-        <p>📞 059 918 1742 | 🌐 aidenhapartments.com</p>
+        <p>📞 059 918 1742 | 🌐 safegoldhotel.com</p>
         <p style="margin-top: 15px; font-weight: bold; color: var(--hotel-primary);">Check-in time: 12:00 pm | Check-out time: 11:00 am</p>
     </footer>
 
@@ -915,7 +915,7 @@
             
             doc.setFontSize(24);
             doc.setTextColor(30, 27, 75); 
-            doc.text("Aidenh Apartments - Official Document", 20, 25);
+            doc.text("Safegold Hotel - Official Document", 20, 25);
             doc.setDrawColor(203, 213, 225);
             doc.line(20, 32, 190, 32);
 
@@ -964,9 +964,9 @@
             doc.setTextColor(148, 163, 184);
             doc.text("If you chose to reserve without payment, please bring this reference to the front desk.", 20, 260);
             doc.text("Note: Checkout time is fixed at 11:00 AM on your final day of stay.", 20, 270);
-            doc.text("Thank you for choosing Aidenh Apartments! We look forward to your arrival.", 20, 280);
+            doc.text("Thank you for choosing Safegold Hotel! We look forward to your arrival.", 20, 280);
 
-            let pdfName = isReservation ? `Aidenh_Reservation_${transactionRef}.pdf` : `Aidenh_Receipt_${transactionRef}.pdf`;
+            let pdfName = isReservation ? `Safegold_Reservation_${transactionRef}.pdf` : `Safegold_Receipt_${transactionRef}.pdf`;
             
             // --- ENTERPRISE LOCKING LOGIC VIA PDF-LIB ---
             const pdfBytes = doc.output('arraybuffer');
@@ -975,8 +975,8 @@
                 try {
                     const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
                     // Add standard metadata to lock authorship
-                    pdfDoc.setTitle("Aidenh Apartments Document");
-                    pdfDoc.setAuthor("Aidenh Apartments Management");
+                    pdfDoc.setTitle("Safegold Hotel Document");
+                    pdfDoc.setAuthor("Safegold Hotel Management");
                     pdfDoc.setCreator("Aidenh Security Portal");
                     pdfDoc.setSubject("Official Booking Document");
 
@@ -1108,7 +1108,7 @@
             
             doc.setFontSize(24);
             doc.setTextColor(30, 27, 75); 
-            doc.text("Aidenh Apartments - Order Receipt", 20, 25);
+            doc.text("Safegold Hotel - Order Receipt", 20, 25);
             doc.setDrawColor(203, 213, 225);
             doc.line(20, 32, 190, 32);
 
@@ -1155,9 +1155,9 @@
             doc.setFontSize(10);
             doc.setTextColor(148, 163, 184);
             doc.text("Your order has been sent off to our kitchen/bar team and will be delivered shortly.", 20, 270);
-            doc.text("Thank you for choosing Aidenh Apartments!", 20, 280);
+            doc.text("Thank you for choosing Safegold Hotel!", 20, 280);
 
-            let pdfName = `Aidenh_Order_${transactionRef}.pdf`;
+            let pdfName = `Safegold_Order_${transactionRef}.pdf`;
 
             // --- ENTERPRISE LOCKING LOGIC VIA PDF-LIB ---
             const pdfBytes = doc.output('arraybuffer');
@@ -1165,8 +1165,8 @@
             (async () => {
                 try {
                     const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
-                    pdfDoc.setTitle("Aidenh Apartments Order");
-                    pdfDoc.setAuthor("Aidenh Apartments Management");
+                    pdfDoc.setTitle("Safegold Hotel Order");
+                    pdfDoc.setAuthor("Safegold Hotel Management");
                     
                     const lockedPdfBytes = await pdfDoc.save();
                     const blob = new Blob([lockedPdfBytes], { type: 'application/pdf' });
