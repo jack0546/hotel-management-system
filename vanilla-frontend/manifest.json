@@ -1,0 +1,17 @@
+{
+  "name": "Safegold Hotel Portal",
+  "short_name": "Safegold",
+  "description": "Premium Hotel Booking & Guest Portal",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "main.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -13,6 +13,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    
+    <!-- PWA & Mobile Optimization -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Safegold">
+    <link rel="apple-touch-icon" href="main.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -246,9 +254,50 @@
             font-weight: 600;
             color: var(--hotel-dark);
         }
+
+        /* PWA Install Banner */
+        #install-banner {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        #install-banner.hidden { display: none; }
+        .install-btn {
+            background: white;
+            color: #1e3a8a;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .install-btn:hover { background: #f1f5f9; transform: scale(1.05); }
     </style>
 </head>
 <body>
+    <!-- PWA INSTALL BANNER -->
+    <div id="install-banner" class="hidden">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <ion-icon name="cloud-download-outline" style="font-size: 20px;"></ion-icon>
+            Install Safegold App for a better experience
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="install-btn" id="install-button">Install Now</button>
+            <button style="background:transparent; border:none; color:white; cursor:pointer;" onclick="this.closest('#install-banner').classList.add('hidden')">
+                <ion-icon name="close-outline" style="font-size: 20px;"></ion-icon>
+            </button>
+        </div>
+    </div>
 
     <!-- TOP NAVIGATION BAR -->
     <header class="top-nav">
@@ -965,6 +1014,33 @@
                         </div>
                     `;
                 });
+        }
+
+        // --- PWA INSTALLATION LOGIC ---
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const installBtn = document.getElementById('install-button');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBanner.classList.remove('hidden');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') installBanner.classList.add('hidden');
+                deferredPrompt = null;
+            }
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+            });
         }
 
         // --- Initial Load Synchronization ---
