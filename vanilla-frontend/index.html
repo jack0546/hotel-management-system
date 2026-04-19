@@ -280,9 +280,9 @@
 </head>
      <body>
      <!-- PWA INSTALL BUTTON (floating, always visible) -->
-     <button id="install-btn" title="Install Safegold App" style="display: flex; position: fixed; top: 110px; right: 20px; z-index: 1000; background: linear-gradient(90deg, #1e3a8a, #3b82f6); color: white; border: none; padding: 10px 15px; border-radius: 25px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); align-items: center; gap: 8px; transition: all 0.3s;">
-         <ion-icon name="cloud-download-outline" style="font-size: 16px;"></ion-icon>
-         <span id="install-btn-text">Install App</span>
+     <button id="install-btn" title="Install Safegold App" style="display: flex; position: fixed; top: 130px; right: 20px; z-index: 1000; background: linear-gradient(90deg, #1e3a8a, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); align-items: center; gap: 6px; transition: all 0.3s;">
+         <ion-icon name="cloud-download-outline" style="font-size: 14px;"></ion-icon>
+         <span id="install-btn-text">Install</span>
      </button>
 
     <!-- TOP NAVIGATION BAR -->
@@ -1063,76 +1063,6 @@
                 }
             }, 3000);
         }
-            };
-            installBanner.style.display = 'flex';
-        }
-
-        const previouslyInstalled = localStorage.getItem('safegold_installed') === 'true';
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                            window.navigator.standalone === true;
-
-        if (isStandalone || previouslyInstalled) {
-            showOpenAppState();
-        } else {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                installBanner.style.display = 'flex';
-                installBtn.textContent = 'Install Now';
-                installMessage.textContent = 'Install Safegold App for a better experience';
-                installBtn.onclick = async () => {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        if (outcome === 'accepted') {
-                            localStorage.setItem('safegold_installed', 'true');
-                            showOpenAppState();
-                        }
-                        deferredPrompt = null;
-                    }
-                };
-            });
-
-            setTimeout(() => {
-                if (!deferredPrompt) {
-                    installBtn.onclick = () => {
-                        alert('PWA installation not available on this browser. Use Chrome, Edge, or Samsung Internet on Android, or install from desktop.');
-                    };
-                    installMessage.textContent = 'Install Safegold App (not supported on this browser)';
-                    installBtn.textContent = 'Learn More';
-                }
-            }, 3000);
-        }
-            };
-         } else {
-             // Not installed - show normal install prompt
-             window.addEventListener('beforeinstallprompt', (e) => {
-                 e.preventDefault();
-                 deferredPrompt = e;
-                 installBanner.style.display = 'flex';
-                 installBtn.textContent = 'Install Now';
-                 installMessage.textContent = 'Install Safegold App for a better experience';
-                 installBtn.onclick = async () => {
-                     if (deferredPrompt) {
-                         deferredPrompt.prompt();
-                         const { outcome } = await deferredPrompt.userChoice;
-                         if (outcome === 'accepted') {
-                             installBanner.style.display = 'none';
-                         }
-                         deferredPrompt = null;
-                     }
-                 };
-             });
-
-             // Fallback: if beforeinstallprompt never fires, show alert on click
-             setTimeout(() => {
-                 if (!deferredPrompt) {
-                     installBtn.onclick = () => {
-                         alert('PWA installation is not available on this browser or device. Please use Chrome, Edge, or Samsung Internet on Android, or install from a desktop browser.');
-                     };
-                 }
-             }, 3000);
-         }
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
