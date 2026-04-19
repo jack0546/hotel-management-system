@@ -11,8 +11,8 @@ export default function Home() {
   const [stats, setStats] = useState({ revenue: 0, active: 0, occupancy: 0 });
 
   const ROOM_TYPES = [
-    "Standard Queen Room", "Family Double & Twin", "Economy Room", 
-    "Ocean View King", "Honeymoon Suite", "Business Suite"
+    "Deluxe Queen Suite", "Executive Family Room", "King Ocean View", 
+    "Master Honeymoon Suite", "Presidential Business Suite", "Classic Economy Room"
   ];
 
   useEffect(() => {

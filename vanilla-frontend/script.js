@@ -152,7 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Populate Rooms
     const roomsContainer = document.getElementById('rooms-container');
-    const roomTypes = ['Deluxe Suite', 'Executive Room', 'Presidential Suite', 'Standard Double', 'Single Studio'];
+    const roomTypes = [
+        "Deluxe Queen Suite", "Executive Family Room", "King Ocean View", 
+        "Master Honeymoon Suite", "Presidential Business Suite", "Classic Economy Room"
+    ];
     
     for(let i = 1; i <= 6; i++) {
         const type = roomTypes[Math.floor(Math.random() * roomTypes.length)];
