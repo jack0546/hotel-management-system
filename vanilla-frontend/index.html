@@ -1276,15 +1276,15 @@
             mobileTabsDropdown.style.display = isVisible ? 'none' : 'block';
         });
 
-        // Handle mobile tab clicks - simplified: just call switchTab with tabId
-        mobileTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                switchTab(tabId);
-                // Close mobile menu
-                mobileTabsDropdown.style.display = 'none';
-            });
-        });
+         // Handle mobile tab clicks - pass the clicked tab element directly
+         mobileTabs.forEach(tab => {
+             tab.addEventListener('click', () => {
+                 const tabId = tab.getAttribute('data-tab');
+                 switchTab(tabId, tab);
+                 // Close mobile menu
+                 mobileTabsDropdown.style.display = 'none';
+             });
+         });
 
         // Close mobile menu when clicking outside
         document.addEventListener('click', (e) => {
