@@ -56,7 +56,7 @@ export default function Home() {
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-hotel-primary to-hotel-secondary flex items-center justify-center font-bold text-xl shadow-lg">
             H
           </div>
-          <h1 className="text-xl font-bold tracking-tight">SmartHotel AI</h1>
+          <h1 className="text-xl font-bold tracking-tight">Safegold Hotel Admin</h1>
         </div>
         
         <nav className="space-y-4">
