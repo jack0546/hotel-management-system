@@ -472,6 +472,26 @@
 
             <button onclick="logoutApp()" class="btn btn-primary" style="background: #ef4444; width: auto; padding: 12px 30px;">Securely Log Out</button>
         </div>
+
+        <div class="glass" style="max-width: 900px; margin: 40px auto; padding: 30px;">
+            <h3 style="color: var(--hotel-primary); margin-bottom: 20px;">My Transaction History</h3>
+            <div style="overflow-x: auto;">
+                <table style="width:100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #e2e8f0; color: #64748b;">
+                            <th style="padding: 10px;">Type</th>
+                            <th style="padding: 10px;">Details</th>
+                            <th style="padding: 10px;">Date/Time</th>
+                            <th style="padding: 10px;">Amount</th>
+                            <th style="padding: 10px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-history-body">
+                        <tr><td colspan="5" style="padding: 20px; text-align:center;">No history found yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- MAIN FOOTER WITH INFO -->
@@ -531,6 +551,9 @@
                 document.getElementById('profile-phone').textContent = user.phoneNumber || 'None linked';
                 document.getElementById('profile-avatar-large').textContent = initial;
 
+                // Load History
+                loadUserHistory(user.uid);
+
                 // Auto-fill forms
                 if(user.displayName) prefilledName.value = user.displayName;
                 if(user.email) {
@@ -543,8 +566,64 @@
                     <a href="login.html" class="nav-btn">Sign Up</a>
                 `;
                 profileTabBtn.classList.add('hidden');
+                document.getElementById('user-history-body').innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align:center;">Please log in to view history.</td></tr>';
             }
         });
+
+        async function loadUserHistory(uid) {
+            const historyBody = document.getElementById('user-history-body');
+            let combinedHistory = [];
+
+            try {
+                // Fetch Bookings
+                const bookSnap = await db.collection('bookings').where('uid', '==', uid).get();
+                bookSnap.forEach(doc => {
+                    const d = doc.data();
+                    combinedHistory.push({
+                        type: 'Room Booking',
+                        details: `${d.roomType}`,
+                        time: d.timestamp ? d.timestamp.toDate() : new Date(),
+                        amount: d.totalPaid,
+                        status: d.status
+                    });
+                });
+
+                // Fetch Orders
+                const orderSnap = await db.collection('orders').where('uid', '==', uid).get();
+                orderSnap.forEach(doc => {
+                    const d = doc.data();
+                    combinedHistory.push({
+                        type: 'Restaurant Order',
+                        details: `${d.quantity}x ${d.item}`,
+                        time: d.timestamp ? d.timestamp.toDate() : new Date(),
+                        amount: d.totalPaid,
+                        status: d.status
+                    });
+                });
+
+                // Sort by time descending
+                combinedHistory.sort((a, b) => b.time - a.time);
+
+                if (combinedHistory.length === 0) {
+                    historyBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align:center;">No recent transactions found.</td></tr>';
+                    return;
+                }
+
+                historyBody.innerHTML = combinedHistory.map(h => `
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.3s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 12px; font-weight: 600; color: var(--hotel-dark)">${h.type}</td>
+                        <td style="padding: 12px; color: #475569;">${h.details}</td>
+                        <td style="padding: 12px; color: #64748b; font-size: 13px;">${h.time.toLocaleString()}</td>
+                        <td style="padding: 12px; font-weight: 700;">GHS ${Number(h.amount).toFixed(2)}</td>
+                        <td style="padding: 12px;"><span style="padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; background: ${h.status.includes('Paid') && !h.status.includes('Unpaid') ? '#dcfce7' : '#fef3c7'}; color: ${h.status.includes('Paid') && !h.status.includes('Unpaid') ? '#166534' : '#92400e'};">${h.status}</span></td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                console.error("Error loading history:", error);
+                historyBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align:center; color: #ef4444;">Failed to load history items.</td></tr>';
+            }
+        }
 
         function logoutApp() {
             auth.signOut().then(() => {
@@ -937,6 +1016,7 @@
                     checkin: bookingState.checkinDate,
                     checkout: bookingState.checkoutDate,
                     reference: transactionRef,
+                    uid: auth.currentUser ? auth.currentUser.uid : null,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(() => console.log("Booking synced to Admin Dashboard!")).catch(e => console.error(e));
             }
@@ -1120,6 +1200,7 @@
                     guestPhone: guestPhone,
                     totalPaid: itemState.total, // Replaces `price` dynamically on Dash
                     reference: transactionRef,
+                    uid: auth.currentUser ? auth.currentUser.uid : null,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(() => console.log("Order synced to Admin Dashboard!")).catch(e => console.error(e));
             }
