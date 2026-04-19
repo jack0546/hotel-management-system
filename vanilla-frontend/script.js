@@ -42,7 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableHTML += `
                     <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.3s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px; font-weight: bold; color: var(--text-main);">${d.guestName || 'Anonymous Guest'}</td>
+                        <td style="padding: 15px; font-size: 13px;">${d.guestPhone || 'N/A'}</td>
                         <td style="padding: 15px;">${d.roomType || 'Walk-In'}</td>
+                        <td style="padding: 15px; font-weight: 500;">${d.roomNumber || 'N/A'}</td>
                         <td style="padding: 15px; font-size: 13px;">${d.checkin || '-'} to ${d.checkout || '-'}</td>
                         <td style="padding: 15px; font-weight:bold; color: ${statusColor};">${d.status || 'Paid'}</td>
                         <td style="padding: 15px; font-weight:bold;">GHS ${d.totalPaid ? parseFloat(d.totalPaid).toFixed(2) : '0.00'}</td>
@@ -78,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableHTML += `
                     <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.3s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px; font-weight: bold; color: var(--text-main);">${d.guestName || 'Walk-in'}</td>
+                        <td style="padding: 15px; font-size: 13px;">${d.guestPhone || 'N/A'}</td>
                         <td style="padding: 15px;">${d.quantity || 1}x ${d.item || 'Custom Order'}</td>
                         <td style="padding: 15px; font-weight: 500;">${d.roomTarget || 'Lobby'}</td>
                         <td style="padding: 15px; font-size: 13px;">${dateStr}</td>

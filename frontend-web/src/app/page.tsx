@@ -168,7 +168,9 @@ function GuestsView({ bookings }: { bookings: any[] }) {
           <thead>
             <tr className="bg-slate-50/50 text-slate-500 text-sm uppercase tracking-wider">
               <th className="px-6 py-4 font-semibold">Guest</th>
+              <th className="px-6 py-4 font-semibold">Contact</th>
               <th className="px-6 py-4 font-semibold">Room Type</th>
+              <th className="px-6 py-4 font-semibold">Unit</th>
               <th className="px-6 py-4 font-semibold">Stay Dates</th>
               <th className="px-6 py-4 font-semibold">Status</th>
               <th className="px-6 py-4 font-semibold">Amount</th>
@@ -188,7 +190,13 @@ function GuestsView({ bookings }: { bookings: any[] }) {
                     <div className="font-bold text-slate-800">{b.guestName || 'Anonymous'}</div>
                     <div className="text-xs text-slate-400">{b.guestEmail || 'no email'}</div>
                   </td>
+                  <td className="px-6 py-4 text-slate-600 text-sm font-medium">{b.guestPhone || 'no phone'}</td>
                   <td className="px-6 py-4 text-slate-600 font-medium">{b.roomType}</td>
+                  <td className="px-6 py-4">
+                    <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">
+                      {b.roomNumber || 'N/A'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-slate-500 text-sm">
                     {b.checkin} to {b.checkout}
                   </td>
