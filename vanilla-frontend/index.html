@@ -256,49 +256,34 @@
             color: var(--hotel-dark);
         }
 
-        /* PWA Install Banner */
-        #install-banner {
-            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        #install-banner.hidden { display: none; }
-        .install-btn {
-            background: white;
-            color: #1e3a8a;
-            border: none;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .install-btn:hover { background: #f1f5f9; transform: scale(1.05); }
+         /* PWA Install Button */
+         #install-btn {
+             background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+             color: white;
+             padding: 10px 15px;
+             border-radius: 25px;
+             font-size: 13px;
+             font-weight: 600;
+             cursor: pointer;
+             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+             transition: all 0.3s;
+             border: none;
+             display: flex;
+             align-items: center;
+             gap: 8px;
+         }
+         #install-btn:hover {
+             transform: translateY(-2px);
+             box-shadow: 0 6px 20px rgba(30, 58, 138, 0.5);
+         }
     </style>
 </head>
-<body>
-     <!-- PWA INSTALL BANNER (Always Visible) -->
-     <div id="install-banner" style="display: flex;">
-         <div style="display: flex; align-items: center; gap: 10px;">
-             <ion-icon name="cloud-download-outline" style="font-size: 20px;"></ion-icon>
-             <span id="install-message">Install Safegold App for a better experience</span>
-         </div>
-         <div style="display: flex; gap: 10px;">
-             <button class="install-btn" id="install-button">Install Now</button>
-             <button style="background:transparent; border:none; color:white; cursor:pointer;" onclick="this.closest('#install-banner').style.display='none'">
-                 <ion-icon name="close-outline" style="font-size: 20px;"></ion-icon>
-             </button>
-         </div>
-     </div>
+     <body>
+     <!-- PWA INSTALL BUTTON (floating, always visible) -->
+     <button id="install-btn" title="Install Safegold App" style="display: flex; position: fixed; top: 110px; right: 20px; z-index: 1000; background: linear-gradient(90deg, #1e3a8a, #3b82f6); color: white; border: none; padding: 10px 15px; border-radius: 25px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); align-items: center; gap: 8px; transition: all 0.3s;">
+         <ion-icon name="cloud-download-outline" style="font-size: 16px;"></ion-icon>
+         <span id="install-btn-text">Install App</span>
+     </button>
 
     <!-- TOP NAVIGATION BAR -->
     <header class="top-nav">
@@ -1026,22 +1011,58 @@
                 });
         }
 
-        // --- PWA INSTALLATION LOGIC (Banner Always Visible) ---
+        // --- PWA INSTALLATION LOGIC (Floating Button Always Visible) ---
         let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
-        const installBtn = document.getElementById('install-button');
-        const installMessage = document.getElementById('install-message');
+        const installBtn = document.getElementById('install-btn');
+        const installBtnText = document.getElementById('install-btn-text');
 
-        function showOpenAppState() {
-            installMessage.textContent = 'Safegold App is installed. Open it now!';
-            installBtn.textContent = 'Open App';
+        function setOpenAppState() {
+            installBtnText.textContent = 'Open App';
+            installBtn.style.display = 'flex';
             installBtn.onclick = () => {
                 if (window.matchMedia('(display-mode: standalone)').matches) {
-                    installBanner.style.display = 'none';
+                    installBtn.style.display = 'none';
                 } else {
                     window.location.href = 'intent://#Intent;scheme=https;package=com.safegold.hotel;end';
-                    setTimeout(() => { installBanner.style.display = 'none'; }, 1000);
+                    setTimeout(() => { installBtn.style.display = 'none'; }, 1000);
                 }
+            };
+        }
+
+        const previouslyInstalled = localStorage.getItem('safegold_installed') === 'true';
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                            window.navigator.standalone === true;
+
+        if (isStandalone || previouslyInstalled) {
+            setOpenAppState();
+        } else {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtnText.textContent = 'Install App';
+                installBtn.style.display = 'flex';
+                installBtn.onclick = async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                            localStorage.setItem('safegold_installed', 'true');
+                            setOpenAppState();
+                        }
+                        deferredPrompt = null;
+                    }
+                };
+            });
+
+            setTimeout(() => {
+                if (!deferredPrompt) {
+                    installBtn.onclick = () => {
+                        alert('PWA installation not available on this browser. Use Chrome, Edge, or Samsung Internet on Android, or install from desktop.');
+                    };
+                    installBtnText.textContent = 'Not Available';
+                }
+            }, 3000);
+        }
             };
             installBanner.style.display = 'flex';
         }
