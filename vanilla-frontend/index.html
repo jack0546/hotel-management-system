@@ -598,9 +598,19 @@
                             const bIn = new Date(data.checkin);
                             const bOut = new Date(data.checkout);
                             
-                            // Mathematics for Date Overlap Analysis (Strict overlap check)
-                            if (reqCheckin < bOut && reqCheckout > bIn) {
-                                bookedRooms.add(data.roomType);
+                            // Real-time Policy: Reset at 11:00 AM
+                            const now = new Date();
+                            const checkoutDay = new Date(bOut);
+                            checkoutDay.setHours(11, 0, 0, 0); // Force 11 AM on checkout day
+
+                            // If we are currently past 11 AM ON the checkout day, this booking is no longer a blocker
+                            const isPastReset = (now > checkoutDay);
+
+                            if (!isPastReset) {
+                                // Mathematics for Date Overlap Analysis
+                                if (reqCheckin < bOut && reqCheckout > bIn) {
+                                    bookedRooms.add(data.roomType);
+                                }
                             }
                         }
                     });
