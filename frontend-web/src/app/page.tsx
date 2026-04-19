@@ -8,7 +8,12 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [stats, setStats] = useState({ revenue: 0, active: 0 });
+  const [stats, setStats] = useState({ revenue: 0, active: 0, occupancy: 0 });
+
+  const ROOM_TYPES = [
+    "Standard Queen Room", "Family Double & Twin", "Economy Room", 
+    "Ocean View King", "Honeymoon Suite", "Business Suite"
+  ];
 
   useEffect(() => {
     const q = query(collection(db, 'bookings'), orderBy('timestamp', 'desc'));
@@ -16,8 +21,22 @@ export default function Home() {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBookings(docs);
       
+      const now = new Date();
+      const activeBookings = docs.filter((b: any) => {
+        const bIn = new Date(b.checkin);
+        const bOut = new Date(b.checkout);
+        bOut.setHours(12, 0, 0, 0); // Include the 12 PM reset policy
+        return now >= bIn && now < bOut;
+      });
+
       const totalRev = docs.reduce((acc, curr: any) => acc + (Number(curr.totalPaid) || 0), 0);
-      setStats({ revenue: totalRev, active: snapshot.size });
+      const occupancyRate = (activeBookings.length / 6) * 100;
+
+      setStats({ 
+        revenue: totalRev, 
+        active: snapshot.size, 
+        occupancy: Math.round(occupancyRate) 
+      });
     });
     return () => unsubscribe();
   }, []);
@@ -56,7 +75,7 @@ export default function Home() {
 
         <div className="p-10">
           {activeTab === 'dashboard' && <DashboardView stats={stats} />}
-          {activeTab === 'rooms' && <RoomsView />}
+          {activeTab === 'rooms' && <RoomsView bookings={bookings} roomTypes={ROOM_TYPES} />}
           {activeTab === 'guests' && <GuestsView bookings={bookings} />}
           {activeTab === 'pos' && <POSView />}
         </div>
@@ -107,9 +126,9 @@ function DashboardView({ stats }: { stats: any }) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title="Total Rooms" value="6" />
-        <StatCard title="Occupancy Rate" value="Live" />
+        <StatCard title="Occupancy Rate" value={`${stats.occupancy}%`} />
         <StatCard title="Total Revenue" value={`GHS ${stats.revenue.toLocaleString()}`} />
-        <StatCard title="Active Bookings" value={stats.active.toString()} />
+        <StatCard title="Total Bookings" value={stats.active.toString()} />
       </div>
       <div className="glass rounded-2xl p-6 mt-8 h-96 flex flex-col items-center justify-center shadow-sm">
         <TrendingUp size={48} className="text-slate-300 mb-4" />
@@ -188,27 +207,46 @@ function GuestsView({ bookings }: { bookings: any[] }) {
   )
 }
 
-function RoomsView() {
+function RoomsView({ bookings, roomTypes }: { bookings: any[], roomTypes: string[] }) {
+  const now = new Date();
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {[101, 102, 103, 104, 201, 202].map(room => (
-        <div key={room} className="glass rounded-xl overflow-hidden shadow-sm group">
-          <div className="h-40 bg-slate-200 relative">
-            {/* Image Placeholder */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-              <span className="text-white font-bold text-xl">Room {room}</span>
+      {roomTypes.map((type, idx) => {
+        const activeBooking = bookings.find((b: any) => {
+          const bIn = new Date(b.checkin);
+          const bOut = new Date(b.checkout);
+          bOut.setHours(12, 0, 0, 0);
+          return b.roomType === type && now >= bIn && now < bOut;
+        });
+
+        const isBooked = !!activeBooking;
+
+        return (
+          <div key={type} className="glass rounded-xl overflow-hidden shadow-sm group">
+            <div className="h-40 bg-slate-200 relative">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                <span className="text-white font-bold text-xl">Unit 10{idx + 1}</span>
+              </div>
+              <div className={`absolute top-4 right-4 text-white text-xs font-bold px-2 py-1 rounded-md ${isBooked ? 'bg-red-500' : 'bg-green-500'}`}>
+                {isBooked ? 'Occupied' : 'Ready'}
+              </div>
             </div>
-            <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md">Available</div>
-          </div>
-          <div className="p-5">
-            <h4 className="font-bold text-slate-800">Deluxe Suite</h4>
-            <div className="flex justify-between items-center mt-4">
-              <p className="text-hotel-primary font-bold text-lg">$150<span className="text-sm font-normal text-slate-500">/night</span></p>
-              <button className="bg-hotel-dark text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-hotel-primary transition">Book Now</button>
+            <div className="p-5">
+              <h4 className="font-bold text-slate-800">{type}</h4>
+              <p className="text-sm text-slate-500 mt-1">
+                {isBooked ? `Guest: ${activeBooking.guestName}` : 'No current occupancy'}
+              </p>
+              <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-50">
+                <p className="text-hotel-primary font-bold text-lg">
+                  {isBooked ? 'Due out 12 PM' : 'Status: Clean'}
+                </p>
+                <div className={`w-3 h-3 rounded-full ${isBooked ? 'bg-red-400 animate-pulse' : 'bg-green-400'}`}></div>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   )
 }
