@@ -1072,28 +1072,20 @@
 
         // --- TABS LOGIC ---
         function switchTab(tabId, btnElement) {
-            // If btnElement not provided, find the appropriate button
+            // If no button provided, find the mobile tab directly
             if (!btnElement) {
-                // Try to find matching desktop button first
-                btnElement = document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
-                // If not found, use mobile tab
-                if (!btnElement) {
-                    btnElement = document.querySelector(`.mobile-tab[data-tab="${tabId}"]`);
-                }
+                btnElement = document.querySelector(`.mobile-tab[data-tab="${tabId}"]`);
             }
             
-            // Update desktop buttons (if any)
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            // Update mobile buttons
-            document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+            // Remove active from all buttons (desktop and mobile)
+            document.querySelectorAll('.tab-btn, .mobile-tab').forEach(btn => btn.classList.remove('active'));
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            // Activate provided button
+            // Activate the button and show content
             if (btnElement) {
                 btnElement.classList.add('active');
             }
-            
-            // Show tab content
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             const tabContent = document.getElementById(tabId);
             if (tabContent) {
                 tabContent.classList.add('active');
