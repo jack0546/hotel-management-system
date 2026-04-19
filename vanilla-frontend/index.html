@@ -13,6 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- PWA & Mobile Optimization -->
     <link rel="manifest" href="manifest.json">
@@ -301,7 +302,10 @@
 
     <!-- TOP NAVIGATION BAR -->
     <header class="top-nav">
-        <div class="logo" style="flex-shrink: 0;">Safegold Hotel</div>
+        <div class="logo" style="flex-shrink: 0; display:flex; align-items:center; gap:8px;">
+            <img src="logo.jpg" alt="Safegold Hotel" style="height:38px; width:38px; object-fit:cover; border-radius:50%; border: 2px solid var(--hotel-primary);">
+            Safegold Hotel
+        </div>
         
         <!-- HEADER TABS -->
         <div class="tabs-wrapper">
@@ -1129,94 +1133,78 @@
         }
 
         function generatePDF(guestName, guestEmail, guestPhone, transactionRef, isReservation = false) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                encryption: {
-                    userPermissions: ["print", "highResolutionPrint"]
-                }
-            });
-            
-            doc.setFontSize(24);
-            doc.setTextColor(30, 27, 75); 
-            doc.text("Safegold Hotel - Official Document", 20, 25);
-            doc.setDrawColor(203, 213, 225);
-            doc.line(20, 32, 190, 32);
+            // Build receipt HTML
+            const logoSrc = window.location.origin + window.location.pathname.replace('index.html','') + 'logo.jpg';
+            const status = isReservation 
+                ? '<span style="color:#ef4444;font-weight:700;">⚠️ UNPAID — PAY AT FRONT DESK</span>'
+                : '<span style="color:#22c55e;font-weight:700;">✅ FULLY PAID</span>';
+            const amountLabel = isReservation ? 'Due at Check-In' : 'Total Amount Paid';
+            const amountColor = isReservation ? '#ef4444' : '#4f46e5';
 
-            doc.setFontSize(12);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`Reference No: ${transactionRef}`, 20, 45);
-            doc.text(`Guest Name: ${guestName}`, 20, 55);
-            doc.text(`Email Address: ${guestEmail}`, 20, 65);
-            doc.text(`Phone Number: ${guestPhone}`, 20, 75);
-            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 120, 45);
+            const div = document.createElement('div');
+            div.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;width:750px;font-family:Outfit,sans-serif;padding:40px;box-sizing:border-box;';
+            div.innerHTML = `
+                <!-- Watermark -->
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);opacity:0.06;">
+                    <img src="logo.jpg" style="width:400px;" crossorigin="anonymous">
+                </div>
+                <!-- Header -->
+                <div style="display:flex;align-items:center;gap:15px;border-bottom:3px solid #1e3a8a;padding-bottom:20px;margin-bottom:25px;">
+                    <img src="logo.jpg" style="width:65px;height:65px;border-radius:50%;object-fit:cover;border:3px solid #1e3a8a;" crossorigin="anonymous">
+                    <div>
+                        <div style="font-size:24px;font-weight:700;color:#1e3a8a;">Safegold Hotel</div>
+                        <div style="font-size:13px;color:#64748b;">3PQM+W89, Koforidua &nbsp;|&nbsp; 020 231 6102 &nbsp;|&nbsp; safegoldhotel.com</div>
+                    </div>
+                    <div style="margin-left:auto;text-align:right;">
+                        <div style="font-size:18px;font-weight:700;color:#1e3a8a;">${isReservation ? 'RESERVATION' : 'BOOKING RECEIPT'}</div>
+                        <div style="font-size:12px;color:#94a3b8;">Generated: ${new Date().toLocaleString()}</div>
+                    </div>
+                </div>
+                <!-- Status & Ref -->
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <div><b style="color:#475569;">Reference:</b> <span style="font-family:monospace;font-size:13px;">${transactionRef}</span></div>
+                    <div>${status}</div>
+                </div>
+                <!-- Guest Info -->
+                <div style="background:#f8fafc;border-radius:12px;padding:18px 22px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div><b style="color:#64748b;">Guest Name</b><br><span style="font-size:15px;">${guestName}</span></div>
+                    <div><b style="color:#64748b;">Email</b><br><span style="font-size:15px;">${guestEmail}</span></div>
+                    <div><b style="color:#64748b;">Phone</b><br><span style="font-size:15px;">${guestPhone}</span></div>
+                </div>
+                <!-- Booking Details -->
+                <div style="background:#eff6ff;border-radius:12px;padding:18px 22px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div><b style="color:#1e3a8a;">Room Type</b><br>${bookingState.roomName}</div>
+                    <div><b style="color:#1e3a8a;">Room Unit</b><br>${bookingState.roomNumber}</div>
+                    <div><b style="color:#1e3a8a;">Check-in</b><br>${bookingState.checkinDate} &nbsp;(2:00 PM)</div>
+                    <div><b style="color:#1e3a8a;">Check-out</b><br>${bookingState.checkoutDate} &nbsp;(12:00 PM)</div>
+                    <div><b style="color:#1e3a8a;">Duration</b><br>${bookingState.nights} Night(s)</div>
+                    <div><b style="color:#1e3a8a;">Rate</b><br>GHS ${bookingState.pricePerNight.toFixed(2)} / night</div>
+                </div>
+                <!-- Total -->
+                <div style="background:#1e3a8a;color:white;border-radius:12px;padding:20px 22px;margin-bottom:25px;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:16px;font-weight:600;">${amountLabel}</span>
+                    <span style="font-size:28px;font-weight:700;">GHS ${bookingState.total.toFixed(2)}</span>
+                </div>
+                <!-- Footer -->
+                <div style="font-size:11px;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:15px;">
+                    Note: Checkout time is strictly 12:00 PM on your final day of stay.<br>
+                    Thank you for choosing Safegold Hotel! We look forward to your arrival.<br>
+                    <b>© ${new Date().getFullYear()} Safegold Hotel — Official Receipt. Do not edit.</b>
+                </div>
+            `;
+            document.body.appendChild(div);
 
-            doc.setFontSize(14);
-            if(isReservation) {
-                doc.setTextColor(239, 68, 68); 
-                doc.text("STATUS: UNPAID (PAY AT FRONT DESK)", 110, 65);
-            } else {
-                doc.setTextColor(34, 197, 94); 
-                doc.text("STATUS: FULLY PAID", 120, 65);
-            }
-
-            doc.setFillColor(248, 250, 252);
-            doc.rect(20, 80, 170, 70, 'F');
-            
-            doc.setFontSize(14);
-            doc.setTextColor(51, 65, 85);
-            doc.text(`Room Classification:  ${bookingState.roomName}`, 30, 95);
-            doc.text(`Dates of Stay:           ${bookingState.checkinDate} to ${bookingState.checkoutDate}`, 30, 110);
-            doc.text(`Checkout Policy:         Strictly 11:00 AM on ${bookingState.checkoutDate}`, 30, 120);
-            doc.text(`Duration:                   ${bookingState.nights} Nights`, 30, 132);
-            doc.text(`Base Rate:                GHS ${bookingState.pricePerNight.toFixed(2)} per night`, 30, 145);
-
-            doc.setDrawColor(79, 70, 229);
-            doc.setLineWidth(1);
-            doc.line(20, 160, 190, 160);
-            
-            doc.setFontSize(22);
-            if(isReservation) {
-                doc.setTextColor(239, 68, 68);
-                doc.text(`Due at Check-In: GHS ${bookingState.total.toFixed(2)}`, 20, 175);
-            } else {
-                doc.setTextColor(79, 70, 229);
-                doc.text(`Total Amount Paid: GHS ${bookingState.total.toFixed(2)}`, 20, 175);
-            }
-
-            doc.setFontSize(10);
-            doc.setTextColor(148, 163, 184);
-            doc.text("If you chose to reserve without payment, please bring this reference to the front desk.", 20, 260);
-            doc.text("Note: Checkout time is fixed at 12:00 PM on your final day of stay.", 20, 270);
-            doc.text("Thank you for choosing Safegold Hotel! We look forward to your arrival.", 20, 280);
-
-            let pdfName = isReservation ? `Safegold_Reservation_${transactionRef}.pdf` : `Safegold_Receipt_${transactionRef}.pdf`;
-            
-            // --- ENTERPRISE LOCKING LOGIC VIA PDF-LIB ---
-            const pdfBytes = doc.output('arraybuffer');
-            
-            (async () => {
-                try {
-                    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
-                    // Add standard metadata to lock authorship
-                    pdfDoc.setTitle("Safegold Hotel Document");
-                    pdfDoc.setAuthor("Safegold Hotel Management");
-                    pdfDoc.setCreator("Safegold Security Portal");
-                    pdfDoc.setSubject("Official Booking Document");
-
-                    // Set standard document permissions to prevent editing
-                    // Note: Browser-side locking is limited but setting metadata and 
-                    // outputting as a protected binary helps prevent common app editing.
-                    const lockedPdfBytes = await pdfDoc.save();
-                    const blob = new Blob([lockedPdfBytes], { type: 'application/pdf' });
-                    const link = document.createElement('a');
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = pdfName;
-                    link.click();
-                } catch (e) {
-                    console.error("PDF Locking failed, falling back to standard save", e);
-                    doc.save(pdfName);
-                }
-            })();
+            setTimeout(() => {
+                html2canvas(div, { scale: 2, useCORS: true, allowTaint: false }).then(canvas => {
+                    document.body.removeChild(div);
+                    canvas.toBlob(blob => {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = isReservation ? `Safegold_Reservation_${transactionRef}.png` : `Safegold_Receipt_${transactionRef}.png`;
+                        link.click();
+                    }, 'image/png');
+                });
+            }, 200);
 
             if (!isReservation) {
                 const msg = `🚨 NEW PAYMENT RECEIVED - Safegold Hotel\n\nGuest: ${guestName}\nRoom: ${bookingState.roomName}\nTotal Paid: GHS ${bookingState.total.toFixed(2)}\nDates: ${bookingState.checkinDate} to ${bookingState.checkoutDate}\nRef: ${transactionRef}`;
@@ -1224,7 +1212,7 @@
                 setTimeout(() => { window.open(waUrl, '_blank'); }, 2000);
             }
 
-            // ================== CLOUD FIRESTORE WRITE FOR ADMIN DASHBOARD ==================
+            // ================== CLOUD FIRESTORE WRITE ==================
             if (db) {
                 db.collection('bookings').add({
                     type: 'Room Booking',
@@ -1240,17 +1228,14 @@
                     reference: transactionRef,
                     uid: auth.currentUser ? auth.currentUser.uid : null,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => console.log("Booking synced to Admin Dashboard!")).catch(e => console.error(e));
+                }).then(() => console.log("Booking synced!")).catch(e => console.error(e));
             }
-            // ===============================================================================
 
             closeBookingModal();
-            
             document.getElementById('status-title').textContent = isReservation ? 'Reservation Confirmed!' : 'Booking Complete!';
-            document.getElementById('status-desc').innerHTML = isReservation ?
-                `Your room has been temporarily reserved! Please prepare to pay <b>GHS ${bookingState.total.toFixed(2)}</b> physically at the reception during your Check-in. <br><br> <b>Note:</b> Room resets at 11:00 AM on ${bookingState.checkoutDate}. <br><br> Your Digital PDF Reservation is downloading...` :
-                `Your payment was successful and your room is officially secured. <br><br> <b>Note:</b> Room resets at 11:00 AM on ${bookingState.checkoutDate}. <br><br> Your Digital PDF Receipt is downloading automatically!`;
-            
+            document.getElementById('status-desc').innerHTML = isReservation
+                ? `Your room has been reserved! Pay <b>GHS ${bookingState.total.toFixed(2)}</b> at reception. <br><br>Your Image Receipt is downloading...`
+                : `Payment successful! Your room is secured. <br><br>Your Image Receipt is downloading!`;
             document.getElementById('status-modal').classList.add('active');
         }
 
@@ -1322,86 +1307,72 @@
         }
 
         function generateItemPDF(guestName, guestEmail, guestPhone, roomLocation, transactionRef, isChargedToRoom = false) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                encryption: {
-                    userPermissions: ["print", "highResolutionPrint"]
-                }
-            });
-            
-            doc.setFontSize(24);
-            doc.setTextColor(30, 27, 75); 
-            doc.text("Safegold Hotel - Order Receipt", 20, 25);
-            doc.setDrawColor(203, 213, 225);
-            doc.line(20, 32, 190, 32);
+            const status = isChargedToRoom
+                ? '<span style="color:#f59e0b;font-weight:700;">⚠️ CHARGED TO ROOM</span>'
+                : '<span style="color:#22c55e;font-weight:700;">✅ FULLY PAID ONLINE</span>';
 
-            doc.setFontSize(12);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`Order Reference: ${transactionRef}`, 20, 45);
-            doc.text(`Customer Name: ${guestName}`, 20, 55);
-            doc.text(`Customer Contact: ${guestPhone}`, 20, 65);
-            doc.text(`Delivery Target: ${roomLocation}`, 20, 75);
-            doc.text(`Date & Time: ${new Date().toLocaleString()}`, 120, 45);
+            const div = document.createElement('div');
+            div.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;width:750px;font-family:Outfit,sans-serif;padding:40px;box-sizing:border-box;';
+            div.innerHTML = `
+                <!-- Watermark -->
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);opacity:0.06;">
+                    <img src="logo.jpg" style="width:400px;" crossorigin="anonymous">
+                </div>
+                <!-- Header -->
+                <div style="display:flex;align-items:center;gap:15px;border-bottom:3px solid #1e3a8a;padding-bottom:20px;margin-bottom:25px;">
+                    <img src="logo.jpg" style="width:65px;height:65px;border-radius:50%;object-fit:cover;border:3px solid #1e3a8a;" crossorigin="anonymous">
+                    <div>
+                        <div style="font-size:24px;font-weight:700;color:#1e3a8a;">Safegold Hotel</div>
+                        <div style="font-size:13px;color:#64748b;">3PQM+W89, Koforidua &nbsp;|&nbsp; 020 231 6102</div>
+                    </div>
+                    <div style="margin-left:auto;text-align:right;">
+                        <div style="font-size:18px;font-weight:700;color:#1e3a8a;">ORDER RECEIPT</div>
+                        <div style="font-size:12px;color:#94a3b8;">${new Date().toLocaleString()}</div>
+                    </div>
+                </div>
+                <!-- Status & Ref -->
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <div><b style="color:#475569;">Order Ref:</b> <span style="font-family:monospace;font-size:13px;">${transactionRef}</span></div>
+                    <div>${status}</div>
+                </div>
+                <!-- Customer Info -->
+                <div style="background:#f8fafc;border-radius:12px;padding:18px 22px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div><b style="color:#64748b;">Customer</b><br>${guestName}</div>
+                    <div><b style="color:#64748b;">Phone</b><br>${guestPhone}</div>
+                    <div><b style="color:#64748b;">Email</b><br>${guestEmail}</div>
+                    <div><b style="color:#64748b;">Delivery To</b><br>${roomLocation}</div>
+                </div>
+                <!-- Order Details -->
+                <div style="background:#eff6ff;border-radius:12px;padding:18px 22px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div><b style="color:#1e3a8a;">Item Ordered</b><br>${itemState.itemName}</div>
+                    <div><b style="color:#1e3a8a;">Quantity</b><br>${itemState.qty}x</div>
+                    <div><b style="color:#1e3a8a;">Unit Price</b><br>GHS ${itemState.price.toFixed(2)}</div>
+                </div>
+                <!-- Total -->
+                <div style="background:#1e3a8a;color:white;border-radius:12px;padding:20px 22px;margin-bottom:25px;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:16px;font-weight:600;">${isChargedToRoom ? 'Added to Room Bill' : 'Amount Paid Online'}</span>
+                    <span style="font-size:28px;font-weight:700;">GHS ${itemState.total.toFixed(2)}</span>
+                </div>
+                <!-- Footer -->
+                <div style="font-size:11px;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:15px;">
+                    Your order has been sent to our kitchen/bar team and will be delivered shortly.<br>
+                    Thank you for choosing Safegold Hotel!<br>
+                    <b>© ${new Date().getFullYear()} Safegold Hotel — Official Receipt. Do not edit.</b>
+                </div>
+            `;
+            document.body.appendChild(div);
 
-            doc.setFontSize(14);
-            if(isChargedToRoom) {
-                doc.setTextColor(245, 158, 11);
-                doc.text("STATUS: CHARGED TO ROOM ACCOUNT", 100, 65);
-            } else {
-                doc.setTextColor(34, 197, 94);
-                doc.text("STATUS: FULLY PAID ONLINE", 120, 65);
-            }
-
-            doc.setFillColor(248, 250, 252);
-            doc.rect(20, 80, 170, 70, 'F');
-            
-            doc.setFontSize(14);
-            doc.setTextColor(51, 65, 85);
-            doc.text(`Item Ordered:      ${itemState.itemName}`, 30, 95);
-            doc.text(`Quantity:              x${itemState.qty}`, 30, 110);
-            doc.text(`Unit Price:            GHS ${itemState.price.toFixed(2)}`, 30, 125);
-
-            doc.setDrawColor(79, 70, 229);
-            doc.setLineWidth(1);
-            doc.line(20, 160, 190, 160);
-            
-            doc.setFontSize(22);
-            doc.setTextColor(79, 70, 229);
-            if(isChargedToRoom) {
-                doc.setTextColor(245, 158, 11);
-                doc.text(`Added to Room Bill: GHS ${itemState.total.toFixed(2)}`, 20, 175);
-            } else {
-                doc.setTextColor(79, 70, 229);
-                doc.text(`Amount Paid Online: GHS ${itemState.total.toFixed(2)}`, 20, 175);
-            }
-
-            doc.setFontSize(10);
-            doc.setTextColor(148, 163, 184);
-            doc.text("Your order has been sent off to our kitchen/bar team and will be delivered shortly.", 20, 270);
-            doc.text("Thank you for choosing Safegold Hotel!", 20, 280);
-
-            let pdfName = `Safegold_Order_${transactionRef}.pdf`;
-
-            // --- ENTERPRISE LOCKING LOGIC VIA PDF-LIB ---
-            const pdfBytes = doc.output('arraybuffer');
-            
-            (async () => {
-                try {
-                    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
-                    pdfDoc.setTitle("Safegold Hotel Order");
-                    pdfDoc.setAuthor("Safegold Hotel Management");
-                    
-                    const lockedPdfBytes = await pdfDoc.save();
-                    const blob = new Blob([lockedPdfBytes], { type: 'application/pdf' });
-                    const link = document.createElement('a');
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = pdfName;
-                    link.click();
-                } catch (e) {
-                    console.error("PDF Locking failed, falling back to standard save", e);
-                    doc.save(pdfName);
-                }
-            })();
+            setTimeout(() => {
+                html2canvas(div, { scale: 2, useCORS: true, allowTaint: false }).then(canvas => {
+                    document.body.removeChild(div);
+                    canvas.toBlob(blob => {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `Safegold_Order_${transactionRef}.png`;
+                        link.click();
+                    }, 'image/png');
+                });
+            }, 200);
 
             if (!isChargedToRoom) {
                 const msg = `🍔 NEW FOOD/DRINK ORDER - Safegold Hotel\n\nCustomer: ${guestName}\nOrder: ${itemState.qty}x ${itemState.itemName}\nLocation: ${roomLocation}\nTotal Paid: GHS ${itemState.total.toFixed(2)}\nRef: ${transactionRef}`;
@@ -1409,7 +1380,6 @@
                 setTimeout(() => { window.open(waUrl, '_blank'); }, 2000);
             }
             
-            // ================== CLOUD FIRESTORE WRITE FOR ADMIN DASHBOARD ==================
             if (db) {
                 db.collection('orders').add({
                     type: 'Restaurant / Bar Order',
@@ -1420,21 +1390,18 @@
                     guestName: guestName,
                     guestEmail: guestEmail,
                     guestPhone: guestPhone,
-                    totalPaid: itemState.total, // Replaces `price` dynamically on Dash
+                    totalPaid: itemState.total,
                     reference: transactionRef,
                     uid: auth.currentUser ? auth.currentUser.uid : null,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => console.log("Order synced to Admin Dashboard!")).catch(e => console.error(e));
+                }).then(() => console.log("Order synced!")).catch(e => console.error(e));
             }
-            // ===============================================================================
 
             closeItemModal();
-            
             document.getElementById('status-title').textContent = isChargedToRoom ? 'Charged to Room!' : 'Order Confirmed!';
-            document.getElementById('status-desc').innerHTML = isChargedToRoom ? 
-                `Your order for <b>${itemState.qty}x ${itemState.itemName}</b> has been received and added to your room checkout bill. Kitchen is prepping it now for Room ${roomLocation}.` :
-                `Your payment was successful. We are actively preparing <b>${itemState.qty}x ${itemState.itemName}</b> for delivery to <b>${roomLocation}</b>. <br><br> Your Digital PDF Receipt is downloading!`;
-                
+            document.getElementById('status-desc').innerHTML = isChargedToRoom
+                ? `Your order for <b>${itemState.qty}x ${itemState.itemName}</b> has been received and added to your room bill. Kitchen is preparing it!`
+                : `Payment successful! Preparing <b>${itemState.qty}x ${itemState.itemName}</b> for <b>${roomLocation}</b>. <br><br>Your Image Receipt is downloading!`;
             document.getElementById('status-modal').classList.add('active');
         }
 
