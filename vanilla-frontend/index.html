@@ -445,12 +445,12 @@
              </div>
              
              <!-- Mobile Hamburger Menu Button (three lines / ☰) -->
-             <button id="mobile-menu-btn" aria-label="Open navigation menu" style="font-size: 28px; line-height: 1; padding: 0 12px; color: white; background: transparent; border: none; cursor: pointer; border-radius: 4px; transition: background 0.2s;">
+             <button id="mobile-menu-btn" aria-label="Open navigation menu" style="font-size: 28px; line-height: 1; padding: 0 12px; color: white; background: transparent; border: none; cursor: pointer; border-radius: 4px; transition: background 0.2s;" onclick="const dd=document.getElementById('mobile-tabs-dropdown'); dd.style.display = dd.style.display === 'block' ? 'none' : 'block';">
                  ☰
              </button>
              
              <!-- Mobile Tabs Dropdown (inside logo-row for positioning) -->
-             <div id="mobile-tabs-dropdown">
+             <div id="mobile-tabs-dropdown" style="display: none;">
                  <button class="tab-btn mobile-tab" data-tab="tab-home">HOME</button>
                  <button class="tab-btn mobile-tab" data-tab="tab-rooms">ROOMS</button>
                  <button class="tab-btn mobile-tab" data-tab="tab-leisure">LEISURE</button>
@@ -463,8 +463,8 @@
              </div>
          </div>
 
-         <!-- Desktop Tabs Row -->
-         <div class="tabs-wrapper" id="desktop-tabs">
+         <!-- Desktop Tabs Row (hidden - only hamburger used) -->
+         <div class="tabs-wrapper" id="desktop-tabs" style="display: none;">
              <button class="tab-btn active" onclick="switchTab('tab-home', this)">HOME</button>
              <button class="tab-btn" id="tab-btn-rooms" onclick="switchTab('tab-rooms', this)">ROOMS</button>
              <button class="tab-btn" onclick="switchTab('tab-leisure', this)">LEISURE</button>
