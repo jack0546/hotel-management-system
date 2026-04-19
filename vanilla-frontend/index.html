@@ -188,6 +188,27 @@
             @media (min-width: 769px){ .booking-widget .book-btn { flex: 1; height: 45px; align-self: flex-end; } }
             @media (max-width: 768px){ .booking-widget .book-btn { margin-top: 10px; } }
         }
+        /* Reviews Styling */
+        .review-card {
+            background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 40px; text-align: left;
+            display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; backdrop-filter: blur(10px);
+        }
+        .rating-summary { text-align: center; min-width: 150px; }
+        .rating-number { font-size: 64px; font-weight: 700; color: #1f2937; line-height: 1; margin-bottom: 10px; }
+        .stars { color: #f59e0b; font-size: 20px; margin-bottom: 5px; }
+        .total-reviews { color: #64748b; font-size: 14px; }
+        
+        .distribution-bars { flex: 1; min-width: 250px; }
+        .dist-row { display: flex; align-items: center; gap: 15px; margin-bottom: 8px; font-size: 14px; color: #475569; }
+        .dist-label { min-width: 15px; font-weight: 600; }
+        .dist-bar-bg { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .dist-bar-fill { height: 100%; background: #f59e0b; border-radius: 4px; }
+        
+        @media (max-width: 768px) {
+            .review-card { flex-direction: column; align-items: center; text-align: center; }
+            .dist-row { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -225,6 +246,48 @@
         <p style="font-size:18px; line-height: 1.8; max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.8); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); backdrop-filter: blur(5px);">
             Experience the perfect blend of modern luxury and homely comfort in the heart of Koforidua. Our premium facilities, serene environment, and world-class hospitality ensure a memorable stay for both business and leisure travelers alike!
         </p>
+
+        <!-- Google Review Summary -->
+        <div class="review-card" style="max-width: 800px; margin: 50px auto 0 auto;">
+            <div class="rating-summary">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-size: 13px;">Google review summary</div>
+                <div class="rating-number">3.5</div>
+                <div class="stars">
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star-half"></ion-icon>
+                    <ion-icon name="star-outline"></ion-icon>
+                </div>
+                <div class="total-reviews">346 reviews</div>
+            </div>
+            
+            <div class="distribution-bars">
+                <div class="dist-row">
+                    <span class="dist-label">5</span>
+                    <div class="dist-bar-bg"><div class="dist-bar-fill" style="width: 45%;"></div></div>
+                </div>
+                <div class="dist-row">
+                    <span class="dist-label">4</span>
+                    <div class="dist-bar-bg"><div class="dist-bar-fill" style="width: 30%;"></div></div>
+                </div>
+                <div class="dist-row">
+                    <span class="dist-label">3</span>
+                    <div class="dist-bar-bg"><div class="dist-bar-fill" style="width: 15%;"></div></div>
+                </div>
+                <div class="dist-row">
+                    <span class="dist-label">2</span>
+                    <div class="dist-bar-bg"><div class="dist-bar-fill" style="width: 7%;"></div></div>
+                </div>
+                <div class="dist-row">
+                    <span class="dist-label">1</span>
+                    <div class="dist-bar-bg"><div class="dist-bar-fill" style="width: 3%;"></div></div>
+                </div>
+                <div style="margin-top: 15px; color: var(--hotel-primary); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    Claim this business <ion-icon name="checkmark-circle"></ion-icon>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ROOMS TAB -->
