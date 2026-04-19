@@ -209,6 +209,43 @@
             .review-card { flex-direction: column; align-items: center; text-align: center; }
             .dist-row { width: 100%; }
         }
+
+        /* Amenities Styling */
+        .amenities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 20px;
+            margin: 40px auto;
+            max-width: 900px;
+            padding: 0 20px;
+        }
+        .amenity-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.5);
+            backdrop-filter: blur(5px);
+        }
+        .amenity-item:hover {
+            transform: translateY(-5px);
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: var(--hotel-primary);
+        }
+        .amenity-item ion-icon {
+            font-size: 32px;
+            color: var(--hotel-primary);
+            margin-bottom: 10px;
+        }
+        .amenity-item span {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--hotel-dark);
+        }
     </style>
 </head>
 <body>
@@ -246,6 +283,34 @@
         <p style="font-size:18px; line-height: 1.8; max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.8); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); backdrop-filter: blur(5px);">
             Experience the perfect blend of modern luxury and homely comfort in the heart of Koforidua. Our premium facilities, serene environment, and world-class hospitality ensure a memorable stay for both business and leisure travelers alike!
         </p>
+
+        <!-- Amenities Section -->
+        <div class="amenities-grid">
+            <div class="amenity-item">
+                <ion-icon name="wifi-outline"></ion-icon>
+                <span>Free Wi-Fi</span>
+            </div>
+            <div class="amenity-item">
+                <ion-icon name="car-outline"></ion-icon>
+                <span>Free Parking</span>
+            </div>
+            <div class="amenity-item">
+                <ion-icon name="water-outline"></ion-icon>
+                <span>Swimming Pool</span>
+            </div>
+            <div class="amenity-item">
+                <ion-icon name="shirt-outline"></ion-icon>
+                <span>Laundry Service</span>
+            </div>
+            <div class="amenity-item">
+                <ion-icon name="happy-outline"></ion-icon>
+                <span>Kid-friendly</span>
+            </div>
+            <div class="amenity-item">
+                <ion-icon name="restaurant-outline"></ion-icon>
+                <span>Gourmet Restaurant</span>
+            </div>
+        </div>
 
         <!-- Google Review Summary -->
         <div class="review-card" style="max-width: 800px; margin: 50px auto 0 auto;">
