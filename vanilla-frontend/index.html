@@ -434,9 +434,10 @@
             </div>
         </div>
 
-        <div id="search-results" class="section-container hidden">
-            <h2 style="color: var(--hotel-primary);">Available Rooms Match Your Needs</h2>
+        <div id="search-results" class="section-container">
+            <h2 style="color: var(--hotel-primary);">Our Rooms &amp; Availability</h2>
             <div class="grid" id="rooms-container">
+                <h3 style="grid-column: 1/-1; text-align: center; color: var(--hotel-primary);">Loading rooms...</h3>
             </div>
         </div>
     </div>
@@ -915,6 +916,10 @@
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             btnElement.classList.add('active');
             document.getElementById(tabId).classList.add('active');
+            // Auto-refresh room availability whenever the Rooms tab is opened
+            if (tabId === 'tab-rooms') {
+                executeSearch();
+            }
         }
 
         // --- ENHANCED LIVE AVAILABILITY SEARCH LOGIC ---
@@ -1049,14 +1054,15 @@
         }
 
         // --- Initial Load Synchronization ---
-        document.addEventListener('DOMContentLoaded', () => {
+        // Run an immediate search on page load so rooms are always visible
+        window.addEventListener('load', () => {
             if(document.getElementById('checkin')) {
                 const today = new Date().toISOString().split('T')[0];
                 const tomorrow = new Date(new Date().getTime() + 24*60*60*1000).toISOString().split('T')[0];
                 document.getElementById('checkin').value = today;
                 document.getElementById('checkout').value = tomorrow;
-                // Wait a moment for Firebase to initialize before auto-searching
-                setTimeout(executeSearch, 1500);
+                // Give Firebase a moment to initialize then load rooms
+                setTimeout(executeSearch, 1200);
             }
         });
 
