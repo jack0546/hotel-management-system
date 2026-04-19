@@ -150,13 +150,51 @@
         }
 
         /* Top Auth Navigation */
-        .top-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 50px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; gap: 20px; flex-wrap: wrap; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
-        .top-nav .logo { color: white; font-size: 26px; font-weight: bold; text-shadow: 1px 1px 10px rgba(0,0,0,0.6); }
-        .top-nav .nav-links { display: flex; align-items: center; gap: 25px; }
-        .nav-link { color: white; text-decoration: none; font-weight: 500; font-size: 17px; text-shadow: 1px 1px 5px rgba(0,0,0,0.6); transition: opacity 0.3s; }
+        .top-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 15px 20px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; gap: 10px; flex-wrap: wrap; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
+        .top-nav .logo { color: white; font-size: 20px; font-weight: bold; text-shadow: 1px 1px 10px rgba(0,0,0,0.6); }
+        .top-nav .nav-links { display: flex; align-items: center; gap: 15px; }
+        .nav-link { color: white; text-decoration: none; font-weight: 500; font-size: 15px; text-shadow: 1px 1px 5px rgba(0,0,0,0.6); transition: opacity 0.3s; }
         .nav-link:hover { opacity: 0.8; }
-        .nav-btn { background: var(--hotel-primary); color: white; text-decoration: none; padding: 10px 25px; border-radius: 30px; font-weight: bold; font-size: 16px; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 2px solid transparent; cursor: pointer; }
-        .nav-btn:hover { background: transparent; border-color: white; transform: translateY(-2px); }
+        .nav-btn { background: var(--hotel-primary); color: white; text-decoration: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid transparent; cursor: pointer; }
+        .nav-btn:hover { background: transparent; border-color: white; transform: translateY(-1px); }
+        
+        /* Mobile Hamburger - Hidden on desktop */
+        #mobile-menu-btn { display: none; }
+        
+        /* Desktop tabs wrapper - shown on desktop */
+        #desktop-tabs { display: flex; }
+        
+        /* Mobile dropdown menu */
+        #mobile-tabs-dropdown { 
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            right: 0; 
+            background: rgba(30, 27, 75, 0.98); 
+            backdrop-filter: blur(10px); 
+            padding: 10px 0; 
+            z-index: 200; 
+            max-height: 50vh; 
+            overflow-y: auto; 
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .mobile-tab {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
+        }
+        .mobile-tab:hover { background: rgba(255,255,255,0.1); padding-left: 25px; }
+        .mobile-tab.active { background: var(--hotel-primary); color: white; }
         
         .user-profile-badge {
             display: flex;
@@ -189,14 +227,25 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        @media (max-width: 768px) {
-            .top-nav { padding: 15px 20px; flex-direction: column; gap: 15px; }
-            .hero h1 { font-size: 40px; margin-top: 50px; }
-            .hero p { font-size: 16px; }
-            .tabs-wrapper { margin-top: 20px; }
-            @media (min-width: 769px){ .booking-widget .book-btn { flex: 1; height: 45px; align-self: flex-end; } }
-            @media (max-width: 768px){ .booking-widget .book-btn { margin-top: 10px; } }
-        }
+         @media (max-width: 768px) {
+             .top-nav { padding: 12px 15px; gap: 8px; }
+             .top-nav .logo { font-size: 16px; }
+             .top-nav .logo img { height: 28px; width: 28px; }
+             .top-nav .nav-links { gap: 10px; }
+             .nav-link { font-size: 13px; }
+             .nav-btn { padding: 6px 14px; font-size: 12px; border-radius: 15px; }
+             
+             /* Hide desktop tabs, show hamburger */
+             #desktop-tabs { display: none; }
+             #mobile-menu-btn { display: block; }
+             
+             /* Adjust hero text */
+             .hero h1 { font-size: 32px; margin-top: 40px; }
+             .hero p { font-size: 14px; }
+             
+             /* Adjust padding */
+             body { padding-top: 70px; }
+         }
         /* Reviews Styling */
         .review-card {
             background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 20px;
@@ -286,31 +335,49 @@
          <span id="install-btn-text">Install</span>
      </button>
 
-    <!-- TOP NAVIGATION BAR -->
-    <header class="top-nav">
-        <div class="logo" style="flex-shrink: 0; display:flex; align-items:center; gap:8px;">
-            <img src="logo.jpg" alt="Safegold Hotel" style="height:38px; width:38px; object-fit:cover; border-radius:50%; border: 2px solid var(--hotel-primary);">
-            Safegold Hotel
-        </div>
-        
-        <!-- HEADER TABS -->
-        <div class="tabs-wrapper">
-            <button class="tab-btn active" onclick="switchTab('tab-home', this)">HOME</button>
-            <button class="tab-btn" id="tab-btn-rooms" onclick="switchTab('tab-rooms', this)">ROOMS</button>
-            <button class="tab-btn" onclick="switchTab('tab-leisure', this)">LEISURE</button>
-            <button class="tab-btn" onclick="switchTab('tab-gallery', this)">GALLERY</button>
-            <button class="tab-btn" onclick="switchTab('tab-tour', this)">TOUR</button>
-            <button class="tab-btn" onclick="switchTab('tab-conference', this)">CONFERENCE & EVENTS</button>
-            <button class="tab-btn" onclick="switchTab('tab-restaurant', this)">RESTAURANT & BAR</button>
-            <button class="tab-btn" onclick="switchTab('tab-contact', this)">CONTACT</button>
-            <button class="tab-btn hidden" id="profile-tab-btn" onclick="switchTab('tab-profile', this)">MY PROFILE</button>
-        </div>
+     <!-- TOP NAVIGATION BAR -->
+     <header class="top-nav">
+         <div class="logo" style="flex-shrink: 0; display:flex; align-items:center; gap:8px;">
+             <img src="logo.jpg" alt="Safegold Hotel" style="height:38px; width:38px; object-fit:cover; border-radius:50%; border: 2px solid var(--hotel-primary);">
+             Safegold Hotel
+         </div>
+         
+         <!-- MOBILE HAMBURGER MENU -->
+         <button id="mobile-menu-btn" style="display: none; background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; padding: 5px;">
+             <ion-icon name="ellipsis-vertical"></ion-icon>
+         </button>
 
-        <div class="nav-links" id="nav-container" style="flex-shrink: 0;">
-            <a href="login.html" class="nav-link">Log In</a>
-            <a href="login.html" class="nav-btn">Sign Up</a>
-        </div>
-    </header>
+         <!-- HEADER TABS (Desktop) -->
+         <div class="tabs-wrapper" id="desktop-tabs">
+             <button class="tab-btn active" onclick="switchTab('tab-home', this)">HOME</button>
+             <button class="tab-btn" id="tab-btn-rooms" onclick="switchTab('tab-rooms', this)">ROOMS</button>
+             <button class="tab-btn" onclick="switchTab('tab-leisure', this)">LEISURE</button>
+             <button class="tab-btn" onclick="switchTab('tab-gallery', this)">GALLERY</button>
+             <button class="tab-btn" onclick="switchTab('tab-tour', this)">TOUR</button>
+             <button class="tab-btn" onclick="switchTab('tab-conference', this)">CONFERENCE & EVENTS</button>
+             <button class="tab-btn" onclick="switchTab('tab-restaurant', this)">RESTAURANT & BAR</button>
+             <button class="tab-btn" onclick="switchTab('tab-contact', this)">CONTACT</button>
+             <button class="tab-btn hidden" id="profile-tab-btn" onclick="switchTab('tab-profile', this)">MY PROFILE</button>
+         </div>
+
+         <!-- MOBILE TABS DROPDOWN -->
+         <div id="mobile-tabs-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: rgba(30, 27, 75, 0.98); backdrop-filter: blur(10px); padding: 10px 0; z-index: 200; max-height: 70vh; overflow-y: auto;">
+             <button class="tab-btn mobile-tab" data-tab="tab-home">HOME</button>
+             <button class="tab-btn mobile-tab" data-tab="tab-rooms">ROOMS</button>
+             <button class="tab-btn mobile-tab" data-tab="tab-leisure">LEISURE</button>
+             <button class="tab-btn mobile-tab" data-tab="tab-gallery">GALLERY</button>
+             <button class="tab-btn mobile-tab" data-tab="tab-tour">TOUR</button>
+             <button class="tab-btn mobile-tab" data-tab="tab-conference">CONFERENCE & EVENTS</button>
+             <button class="tab-btn mobile-tab" data-tab="tab-restaurant">RESTAURANT & BAR</button>
+             <button class="tab-btn mobile-tab" data-tab="tab-contact">CONTACT</button>
+             <button class="tab-btn mobile-tab hidden" id="mobile-profile-tab" data-tab="tab-profile">MY PROFILE</button>
+         </div>
+
+         <div class="nav-links" id="nav-container" style="flex-shrink: 0;">
+             <a href="login.html" class="nav-link">Log In</a>
+             <a href="login.html" class="nav-btn">Sign Up</a>
+         </div>
+     </header>
 
     <div class="hero">
         <h1>Safegold Hotel</h1>
@@ -898,10 +965,19 @@
 
         // --- TABS LOGIC ---
         function switchTab(tabId, btnElement) {
+            // Update desktop buttons
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             btnElement.classList.add('active');
             document.getElementById(tabId).classList.add('active');
+            
+            // Update mobile buttons
+            const mobileTab = document.querySelector(`.mobile-tab[data-tab="${tabId}"]`);
+            if (mobileTab) {
+                document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+                mobileTab.classList.add('active');
+            }
+            
             // Auto-refresh room availability whenever the Rooms tab is opened
             if (tabId === 'tab-rooms') {
                 executeSearch();
@@ -1063,6 +1139,54 @@
                     installBtnText.textContent = 'Not Available';
                 }
             }, 3000);
+        }
+
+        // --- MOBILE MENU LOGIC ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileTabsDropdown = document.getElementById('mobile-tabs-dropdown');
+        const mobileTabs = document.querySelectorAll('.mobile-tab');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            const isVisible = mobileTabsDropdown.style.display === 'block';
+            mobileTabsDropdown.style.display = isVisible ? 'none' : 'block';
+        });
+
+        // Handle mobile tab clicks
+        mobileTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                // Call switchTab with the desktop button for consistency
+                const desktopBtn = document.getElementById('tab-btn-rooms');
+                // Find the corresponding desktop button
+                let targetBtn;
+                if (tabId === 'tab-home') targetBtn = document.querySelector('.tab-btn[onclick*="tab-home"]');
+                else if (tabId === 'tab-rooms') targetBtn = document.getElementById('tab-btn-rooms');
+                else if (tabId === 'tab-leisure') targetBtn = document.querySelector('.tab-btn[onclick*="tab-leisure"]');
+                else if (tabId === 'tab-gallery') targetBtn = document.querySelector('.tab-btn[onclick*="tab-gallery"]');
+                else if (tabId === 'tab-tour') targetBtn = document.querySelector('.tab-btn[onclick*="tab-tour"]');
+                else if (tabId === 'tab-conference') targetBtn = document.querySelector('.tab-btn[onclick*="tab-conference"]');
+                else if (tabId === 'tab-restaurant') targetBtn = document.querySelector('.tab-btn[onclick*="tab-restaurant"]');
+                else if (tabId === 'tab-contact') targetBtn = document.querySelector('.tab-btn[onclick*="tab-contact"]');
+                else if (tabId === 'tab-profile') targetBtn = document.getElementById('profile-tab-btn');
+                
+                if (targetBtn) {
+                    switchTab(tabId, targetBtn);
+                }
+                // Close mobile menu
+                mobileTabsDropdown.style.display = 'none';
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenuBtn.contains(e.target) && !mobileTabsDropdown.contains(e.target)) {
+                mobileTabsDropdown.style.display = 'none';
+            }
+        });
+
+        // Initialize mobile menu state on load
+        if (window.innerWidth <= 768) {
+            mobileTabsDropdown.style.display = 'none';
         }
 
         // Register Service Worker
