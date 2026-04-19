@@ -280,8 +280,9 @@
 </head>
      <body>
      <!-- PWA INSTALL BUTTON (floating, always visible) -->
-     <button id="install-btn" title="Install Safegold App" style="display: flex; position: fixed; top: 130px; right: 20px; z-index: 1000; background: linear-gradient(90deg, #1e3a8a, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); align-items: center; gap: 6px; transition: all 0.3s;">
-         <ion-icon name="cloud-download-outline" style="font-size: 14px;"></ion-icon>
+     <!-- PWA INSTALL BUTTON (floating, bottom-right, always visible) -->
+     <button id="install-btn" title="Install Safegold App" style="position: fixed; bottom: 100px; right: 30px; z-index: 999; background: linear-gradient(90deg, #1e3a8a, #3b82f6); color: white; border: none; padding: 10px 14px; border-radius: 25px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 6px; transition: all 0.3s; opacity: 0; animation: fadeIn 0.5s ease-out 1s forwards;">
+         <ion-icon name="cloud-download-outline" style="font-size: 16px;"></ion-icon>
          <span id="install-btn-text">Install</span>
      </button>
 
