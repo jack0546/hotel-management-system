@@ -233,18 +233,13 @@
             transform: translateY(-1px); 
         }
         
-        /* Desktop tabs - hidden on mobile */
-        #desktop-tabs { 
-            display: none; 
-            width: 100%;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 6px;
-        }
-        
-        /* Mobile tabs dropdown - positioned below logo-row */
-        #mobile-tabs-dropdown { 
+         /* Mobile-first: hide desktop tabs by default */
+         .tabs-wrapper, #desktop-tabs {
+             display: none !important;
+         }
+         
+         /* Mobile tabs dropdown - positioned below logo-row */
+         #mobile-tabs-dropdown { 
             position: absolute;
             top: 100%;
             left: 0;
@@ -319,18 +314,57 @@
                  width: auto;
                  gap: 10px;
                  position: static;
+                 order: 1;
              }
-             #mobile-menu-btn { display: none !important; }
+             #mobile-menu-btn { 
+                 display: block !important; 
+                 align-self: center;
+                 font-size: 24px;
+                 padding: 0 8px;
+             }
+             
+             /* Keep desktop tabs HIDDEN - tabs only in hamburger */
+             #desktop-tabs { 
+                 display: none !important; 
+             }
+             
+             /* Hide mobile dropdown on desktop until clicked (it's absolute, fine) */
+             .mobile-tab { display: none !important; }
              #mobile-tabs-dropdown { display: none !important; }
              
-             #desktop-tabs { 
-                 display: flex !important; 
-                 margin-top: 0;
-                 flex: 1;
-                 justify-content: center;
-                 order: 2;
-                 gap: 8px;
+             .top-nav .logo { font-size: 20px; }
+             .top-nav .logo img { height: 36px; width: 36px; }
+             
+             .tab-btn { 
+                 font-size: 14px; 
+                 padding: 6px 12px; 
+                 white-space: nowrap;
              }
+             
+             .top-nav .nav-links { 
+                 order: 3; 
+                 gap: 12px;
+             }
+             .nav-link { font-size: 14px; }
+             .nav-btn { padding: 6px 18px; font-size: 14px; }
+         }
+             .logo-row { 
+                 flex-direction: row; 
+                 width: auto;
+                 gap: 10px;
+                 position: static;
+                 order: 1;
+             }
+             /* Always hide hamburger on desktop - WAIT, user wants hamburger always! */
+             /* So remove this: #mobile-menu-btn { display: none !important; } */
+             
+             /* Keep desktop tabs HIDDEN always - user wants tabs only in hamburger */
+             #desktop-tabs { 
+                 display: none !important; 
+             }
+             
+             .mobile-tab { display: none !important; }
+             #mobile-tabs-dropdown { display: none !important; }
              
              .top-nav .logo { font-size: 20px; }
              .top-nav .logo img { height: 36px; width: 36px; }
