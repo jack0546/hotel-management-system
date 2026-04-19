@@ -1,8 +1,8 @@
-const CACHE_NAME = 'safegold-v1';
+const CACHE_NAME = 'safegold-v2';
 const ASSETS = [
   'index.html',
   'style.css',
-  'main.png',
+  'logo.jpg',
   'manifest.json'
 ];
 
