@@ -719,6 +719,7 @@
 
         // --- ENHANCED LIVE AVAILABILITY SEARCH LOGIC ---
         async function executeSearch() {
+            const now = new Date();
             const requestedGuests = parseInt(document.getElementById('guests-count').value);
             const reqCheckin = new Date(document.getElementById('checkin').value);
             const reqCheckout = new Date(document.getElementById('checkout').value);
@@ -743,7 +744,6 @@
                             const bOut = new Date(data.checkout);
                             
                             // Real-time Policy: Reset at 11:00 AM
-                            const now = new Date();
                             const checkoutDay = new Date(bOut);
                             checkoutDay.setHours(11, 0, 0, 0); // Force 11 AM on checkout day
 
@@ -819,7 +819,6 @@
                         </div>
                     `;
                 });
-            }
         }
 
         // --- Initial Load Synchronization ---
