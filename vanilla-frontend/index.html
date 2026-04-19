@@ -783,6 +783,7 @@
             const prefilledEmail = document.getElementById('guest-email');
             const itemEmail = document.getElementById('item-guest-email');
             const profileTabBtn = document.getElementById('profile-tab-btn');
+            const mobileProfileTab = document.getElementById('mobile-profile-tab');
             
             if (user) {
                 const identifier = user.displayName || user.email || user.phoneNumber || 'Guest User';
@@ -796,8 +797,9 @@
                     </div>
                 `;
 
-                // Show the Profile Tab in navigation
+                // Show the Profile Tab in navigation (both desktop and mobile)
                 profileTabBtn.classList.remove('hidden');
+                mobileProfileTab.classList.remove('hidden');
 
                 // Update Profile Tab content
                 document.getElementById('profile-name').textContent = identifier;
@@ -820,6 +822,7 @@
                     <a href="login.html" class="nav-btn">Sign Up</a>
                 `;
                 profileTabBtn.classList.add('hidden');
+                mobileProfileTab.classList.add('hidden');
                 document.getElementById('user-history-body').innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align:center;">Please log in to view history.</td></tr>';
             }
         });
@@ -1155,8 +1158,6 @@
         mobileTabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const tabId = tab.getAttribute('data-tab');
-                // Call switchTab with the desktop button for consistency
-                const desktopBtn = document.getElementById('tab-btn-rooms');
                 // Find the corresponding desktop button
                 let targetBtn;
                 if (tabId === 'tab-home') targetBtn = document.querySelector('.tab-btn[onclick*="tab-home"]');
