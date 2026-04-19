@@ -150,7 +150,34 @@
         .nav-btn:hover { background: transparent; border-color: white; transform: translateY(-2px); }
         
         .user-profile-badge {
-            color: white; font-weight: bold; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; font-size: 14px; backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 5px 15px 5px 5px;
+            border-radius: 30px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .user-profile-badge:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--hotel-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         @media (max-width: 768px) {
@@ -178,6 +205,7 @@
             <button class="tab-btn" onclick="switchTab('tab-conference', this)">CONFERENCE & EVENTS</button>
             <button class="tab-btn" onclick="switchTab('tab-restaurant', this)">RESTAURANT & BAR</button>
             <button class="tab-btn" onclick="switchTab('tab-contact', this)">CONTACT</button>
+            <button class="tab-btn hidden" id="profile-tab-btn" onclick="switchTab('tab-profile', this)">MY PROFILE</button>
         </div>
 
         <div class="nav-links" id="nav-container" style="flex-shrink: 0;">
@@ -424,6 +452,28 @@
         </div>
     </div>
 
+    <!-- PROFILE TAB -->
+    <div id="tab-profile" class="tab-content section-container">
+        <div class="glass" style="max-width: 600px; margin: 40px auto; padding: 40px; text-align: center;">
+            <div id="profile-avatar-large" style="width: 100px; height: 100px; background: var(--hotel-primary); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);">👤</div>
+            <h2 id="profile-name" style="margin-bottom: 10px; color: var(--hotel-dark);">User Name</h2>
+            <p id="profile-email" style="color: var(--text-muted); margin-bottom: 30px;">email@example.com</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-bottom: 30px;">
+                <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <small style="color: #64748b; display: block; margin-bottom: 4px;">Phone Number</small>
+                    <strong id="profile-phone" style="color: var(--hotel-dark);">-</strong>
+                </div>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <small style="color: #64748b; display: block; margin-bottom: 4px;">Account Status</small>
+                    <strong style="color: #10b981;">Active Guest</strong>
+                </div>
+            </div>
+
+            <button onclick="logoutApp()" class="btn btn-primary" style="background: #ef4444; width: auto; padding: 12px 30px;">Securely Log Out</button>
+        </div>
+    </div>
+
     <!-- MAIN FOOTER WITH INFO -->
     <footer class="hotel-footer">
         <h2>Aidenh Apartments</h2>
@@ -458,31 +508,41 @@
             const prefilledName = document.getElementById('guest-name');
             const prefilledEmail = document.getElementById('guest-email');
             const itemEmail = document.getElementById('item-guest-email');
+            const profileTabBtn = document.getElementById('profile-tab-btn');
             
             if (user) {
-                // Determine display identifier (Name, Email, or Phone)
-                const identifier = user.displayName || user.email || user.phoneNumber || 'Auth Guest';
+                const identifier = user.displayName || user.email || user.phoneNumber || 'Guest User';
+                const initial = identifier.charAt(0).toUpperCase();
                 
-                // Replace Login/Signup with Profile & Logout
+                // Replace Login/Signup with Profile Badge
                 navContainer.innerHTML = `
-                    <div class="user-profile-badge">
-                        👤 ${identifier}
+                    <div class="user-profile-badge" onclick="document.getElementById('profile-tab-btn').click()">
+                        <div class="user-avatar">${initial}</div>
+                        <span>${identifier.split('@')[0]}</span>
                     </div>
-                    <button onclick="logoutApp()" class="nav-btn" style="background: #ef4444; border:none;">Log Out</button>
                 `;
 
-                // Auto-fill booking forms if they are logged in!
+                // Show the Profile Tab in navigation
+                profileTabBtn.classList.remove('hidden');
+
+                // Update Profile Tab content
+                document.getElementById('profile-name').textContent = identifier;
+                document.getElementById('profile-email').textContent = user.email || 'No email provided';
+                document.getElementById('profile-phone').textContent = user.phoneNumber || 'None linked';
+                document.getElementById('profile-avatar-large').textContent = initial;
+
+                // Auto-fill forms
                 if(user.displayName) prefilledName.value = user.displayName;
                 if(user.email) {
                     prefilledEmail.value = user.email;
                     itemEmail.value = user.email;
                 }
-                
             } else {
                 navContainer.innerHTML = `
                     <a href="login.html" class="nav-link">Log In</a>
                     <a href="login.html" class="nav-btn">Sign Up</a>
                 `;
+                profileTabBtn.classList.add('hidden');
             }
         });
 
