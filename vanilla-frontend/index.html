@@ -598,12 +598,12 @@
                             const bIn = new Date(data.checkin);
                             const bOut = new Date(data.checkout);
                             
-                            // Real-time Policy: Reset at 11:00 AM
+                            // Real-time Policy: Reset at 12:00 PM (Includes 1-hour cleaning buffer)
                             const now = new Date();
                             const checkoutDay = new Date(bOut);
-                            checkoutDay.setHours(11, 0, 0, 0); // Force 11 AM on checkout day
+                            checkoutDay.setHours(12, 0, 0, 0); // Force 12 PM on checkout day
 
-                            // If we are currently past 11 AM ON the checkout day, this booking is no longer a blocker
+                            // If we are currently past 12 PM ON the checkout day, this booking is no longer a blocker
                             const isPastReset = (now > checkoutDay);
 
                             if (!isPastReset) {
