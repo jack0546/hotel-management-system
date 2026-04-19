@@ -749,8 +749,9 @@
             doc.setTextColor(51, 65, 85);
             doc.text(`Room Classification:  ${bookingState.roomName}`, 30, 95);
             doc.text(`Dates of Stay:           ${bookingState.checkinDate} to ${bookingState.checkoutDate}`, 30, 110);
-            doc.text(`Duration:                   ${bookingState.nights} Nights`, 30, 125);
-            doc.text(`Base Rate:                GHS ${bookingState.pricePerNight.toFixed(2)} per night`, 30, 140);
+            doc.text(`Checkout Policy:         Strictly 11:00 AM on ${bookingState.checkoutDate}`, 30, 120);
+            doc.text(`Duration:                   ${bookingState.nights} Nights`, 30, 132);
+            doc.text(`Base Rate:                GHS ${bookingState.pricePerNight.toFixed(2)} per night`, 30, 145);
 
             doc.setDrawColor(79, 70, 229);
             doc.setLineWidth(1);
@@ -767,7 +768,8 @@
 
             doc.setFontSize(10);
             doc.setTextColor(148, 163, 184);
-            doc.text("If you chose to reserve without payment, please bring this reference to the front desk.", 20, 270);
+            doc.text("If you chose to reserve without payment, please bring this reference to the front desk.", 20, 260);
+            doc.text("Note: Checkout time is fixed at 11:00 AM on your final day of stay.", 20, 270);
             doc.text("Thank you for choosing Aidenh Apartments! We look forward to your arrival.", 20, 280);
 
             let pdfName = isReservation ? `Aidenh_Reservation_${transactionRef}.pdf` : `Aidenh_Receipt_${transactionRef}.pdf`;
@@ -832,8 +834,8 @@
             
             document.getElementById('status-title').textContent = isReservation ? 'Reservation Confirmed!' : 'Booking Complete!';
             document.getElementById('status-desc').innerHTML = isReservation ?
-                `Your room has been temporarily reserved! Please prepare to pay <b>GHS ${bookingState.total.toFixed(2)}</b> physically at the reception during your Check-in. <br><br> Your Digital PDF Reservation is downloading...` :
-                `Your payment was successful and your room is officially secured. <br><br> Your Digital PDF Receipt is downloading automatically!`;
+                `Your room has been temporarily reserved! Please prepare to pay <b>GHS ${bookingState.total.toFixed(2)}</b> physically at the reception during your Check-in. <br><br> <b>Note:</b> Room resets at 11:00 AM on ${bookingState.checkoutDate}. <br><br> Your Digital PDF Reservation is downloading...` :
+                `Your payment was successful and your room is officially secured. <br><br> <b>Note:</b> Room resets at 11:00 AM on ${bookingState.checkoutDate}. <br><br> Your Digital PDF Receipt is downloading automatically!`;
             
             document.getElementById('status-modal').classList.add('active');
         }
