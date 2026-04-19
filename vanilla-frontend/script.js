@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     for(let i = 1; i <= 6; i++) {
         const type = roomTypes[Math.floor(Math.random() * roomTypes.length)];
-        const price = Math.floor(Math.random() * 200) + 100;
+        const price = 1;
         
         roomsContainer.innerHTML += `
             <div class="room-card">
@@ -186,12 +186,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const orderTotalEl = document.getElementById('order-total');
     
     const menu = [
-        {name: "Burger Combo", price: 12.00, icon: "fast-food-outline"},
-        {name: "Pasta Plate", price: 18.50, icon: "restaurant-outline"},
-        {name: "Steak Frites", price: 32.00, icon: "restaurant"},
-        {name: "House Salad", price: 9.00, icon: "leaf-outline"},
-        {name: "Cocktail", price: 8.50, icon: "wine-outline"},
-        {name: "Dessert", price: 6.00, icon: "ice-cream-outline"}
+        {name: "Burger Combo", price: 1.00, icon: "fast-food-outline"},
+        {name: "Pasta Plate", price: 1.00, icon: "restaurant-outline"},
+        {name: "Steak Frites", price: 1.00, icon: "restaurant"},
+        {name: "House Salad", price: 1.00, icon: "leaf-outline"},
+        {name: "Cocktail", price: 1.00, icon: "wine-outline"},
+        {name: "Dessert", price: 1.00, icon: "ice-cream-outline"}
     ];
 
     let currentOrder = [];
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         div.innerHTML = `
             <div class="menu-icon"><ion-icon name="${item.icon}"></ion-icon></div>
             <h4>${item.name}</h4>
-            <p>$${item.price.toFixed(2)}</p>
+            <p>GHS ${item.price.toFixed(2)}</p>
         `;
         div.addEventListener('click', () => {
             currentOrder.push(item);
@@ -220,12 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
             orderItems.innerHTML += `
                 <div class="order-row">
                     <span class="name">${item.name}</span>
-                    <span class="price">$${item.price.toFixed(2)}</span>
+                    <span class="price">GHS ${item.price.toFixed(2)}</span>
                 </div>
             `;
         });
         
-        orderTotalEl.textContent = `$${total.toFixed(2)}`;
+        orderTotalEl.textContent = `GHS ${total.toFixed(2)}`;
     }
 
     // AI Assistant Logic

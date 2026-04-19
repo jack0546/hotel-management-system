@@ -8,6 +8,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [now, setNow] = useState(new Date());
   const [stats, setStats] = useState({ revenue: 0, active: 0, occupancy: 0 });
 
   const ROOM_TYPES = [
@@ -16,17 +17,20 @@ export default function Home() {
   ];
 
   useEffect(() => {
+    // Update local 'now' every minute to auto-refresh room status
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    
     const q = query(collection(db, 'bookings'), orderBy('timestamp', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBookings(docs);
       
-      const now = new Date();
+      const currentTime = new Date();
       const activeBookings = docs.filter((b: any) => {
         const bIn = new Date(b.checkin);
         const bOut = new Date(b.checkout);
-        bOut.setHours(12, 0, 0, 0); // Include the 12 PM reset policy
-        return now >= bIn && now < bOut;
+        bOut.setHours(11, 0, 0, 0); // Strictly 11 AM reset
+        return currentTime >= bIn && currentTime < bOut;
       });
 
       const totalRev = docs.reduce((acc, curr: any) => acc + (Number(curr.totalPaid) || 0), 0);
@@ -34,11 +38,14 @@ export default function Home() {
 
       setStats({ 
         revenue: totalRev, 
-        active: snapshot.size, 
+        active: activeBookings.length, // Only active bookings
         occupancy: Math.round(occupancyRate) 
       });
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearInterval(timer);
+    };
   }, []);
 
   return (
@@ -75,7 +82,7 @@ export default function Home() {
 
         <div className="p-10">
           {activeTab === 'dashboard' && <DashboardView stats={stats} />}
-          {activeTab === 'rooms' && <RoomsView bookings={bookings} roomTypes={ROOM_TYPES} />}
+          {activeTab === 'rooms' && <RoomsView bookings={bookings} roomTypes={ROOM_TYPES} now={now} />}
           {activeTab === 'guests' && <GuestsView bookings={bookings} />}
           {activeTab === 'pos' && <POSView />}
         </div>
@@ -207,20 +214,30 @@ function GuestsView({ bookings }: { bookings: any[] }) {
   )
 }
 
-function RoomsView({ bookings, roomTypes }: { bookings: any[], roomTypes: string[] }) {
-  const now = new Date();
-  
+function RoomsView({ bookings, roomTypes, now }: { bookings: any[], roomTypes: string[], now: Date }) {
+  const getCountdown = (checkoutStr: string) => {
+    const bOut = new Date(checkoutStr);
+    bOut.setHours(11, 0, 0, 0);
+    const diff = bOut.getTime() - now.getTime();
+    if (diff <= 0) return null;
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${mins}m left`;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {roomTypes.map((type, idx) => {
         const activeBooking = bookings.find((b: any) => {
           const bIn = new Date(b.checkin);
           const bOut = new Date(b.checkout);
-          bOut.setHours(12, 0, 0, 0);
+          bOut.setHours(11, 0, 0, 0);
           return b.roomType === type && now >= bIn && now < bOut;
         });
 
         const isBooked = !!activeBooking;
+        const countdown = isBooked ? getCountdown(activeBooking.checkout) : null;
 
         return (
           <div key={type} className="glass rounded-xl overflow-hidden shadow-sm group">
@@ -231,6 +248,11 @@ function RoomsView({ bookings, roomTypes }: { bookings: any[], roomTypes: string
               <div className={`absolute top-4 right-4 text-white text-xs font-bold px-2 py-1 rounded-md ${isBooked ? 'bg-red-500' : 'bg-green-500'}`}>
                 {isBooked ? 'Occupied' : 'Ready'}
               </div>
+              {countdown && (
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-hotel-primary text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
+                  {countdown}
+                </div>
+              )}
             </div>
             <div className="p-5">
               <h4 className="font-bold text-slate-800">{type}</h4>
@@ -239,7 +261,7 @@ function RoomsView({ bookings, roomTypes }: { bookings: any[], roomTypes: string
               </p>
               <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-50">
                 <p className="text-hotel-primary font-bold text-lg">
-                  {isBooked ? 'Due out 12 PM' : 'Status: Clean'}
+                  {isBooked ? 'Due out 11 AM' : 'Status: Clean'}
                 </p>
                 <div className={`w-3 h-3 rounded-full ${isBooked ? 'bg-red-400 animate-pulse' : 'bg-green-400'}`}></div>
               </div>
@@ -261,7 +283,7 @@ function POSView() {
             <div key={i} className="border p-4 rounded-xl hover:shadow-md cursor-pointer transition bg-white text-center">
               <div className="w-16 h-16 bg-slate-100 rounded-full mx-auto mb-3"></div>
               <h4 className="font-medium">Burger Combo {i}</h4>
-              <p className="text-hotel-primary font-bold mt-1">$12.00</p>
+              <p className="text-hotel-primary font-bold mt-1">GHS 1.00</p>
             </div>
           ))}
         </div>
@@ -271,13 +293,13 @@ function POSView() {
         <div className="flex-1 overflow-y-auto space-y-3">
           <div className="flex justify-between text-sm items-center p-2 bg-slate-50 rounded">
             <span>2x Burger Combo 1</span>
-            <span className="font-bold">$24.00</span>
+            <span className="font-bold">GHS 1.00</span>
           </div>
         </div>
         <div className="mt-4 pt-4 border-t space-y-2">
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>$24.00</span>
+            <span>GHS 1.00</span>
           </div>
           <button className="w-full bg-hotel-primary text-white py-3 rounded-xl font-bold mt-4 hover:shadow-lg transition">Charge to Room</button>
           <button className="w-full bg-hotel-dark text-white py-3 rounded-xl font-bold hover:shadow-lg transition">Pay Now</button>

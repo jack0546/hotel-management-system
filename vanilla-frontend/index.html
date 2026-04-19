@@ -207,18 +207,13 @@
                 <input type="date" id="checkin">
             </div>
             <div class="input-group">
-                <label>Check Out (12:00 pm)</label>
+                <label>Check Out (11:00 am)</label>
                 <input type="date" id="checkout">
             </div>
             <div class="input-group">
                 <label>How many people?</label>
                 <select id="guests-count">
-                    <option value="1">1 Person</option>
-                    <option value="2" selected>2 People</option>
-                    <option value="3">3 People</option>
-                    <option value="4">4 People</option>
-                    <option value="6">6 People</option>
-                    <option value="8">8+ People</option>
+                    <option value="1" selected>1 Person</option>
                 </select>
             </div>
             <div class="input-group" style="flex: 0.5;">
@@ -426,7 +421,7 @@
         <h2>Aidenh Apartments</h2>
         <p>Two Streams - Mangoase Junction, Koforidua (3Q64+52)</p>
         <p>📞 059 918 1742 | 🌐 aidenhapartments.com</p>
-        <p style="margin-top: 15px; font-weight: bold; color: var(--hotel-primary);">Check-in time: 12:00 pm | Check-out time: 12:00 pm</p>
+        <p style="margin-top: 15px; font-weight: bold; color: var(--hotel-primary);">Check-in time: 12:00 pm | Check-out time: 11:00 am</p>
     </footer>
 
     <script>
@@ -492,12 +487,12 @@
         // --- DATA DICTIONARIES ---
 
         const RAW_ROOMS = [
-            { name: "Deluxe Queen Suite", img: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c", desc: "1 queen bed. Free breakfast · Free Wi-Fi · Free parking.", cap: 2, price: 1 },
-            { name: "Executive Family Room", img: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461", desc: "1 double bed, 1 twin bed. Free cancellation · Free Wi-Fi.", cap: 3, price: 1 },
-            { name: "King Ocean View", img: "https://images.unsplash.com/photo-1618773928120-d3c5fcc655eb", desc: "1 king bed. Beach front view · Free breakfast · Free parking.", cap: 2, price: 1 },
-            { name: "Master Honeymoon Suite", img: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b", desc: "1 luxury double bed. Romantic decor · Free champagne.", cap: 2, price: 1 },
-            { name: "Presidential Business Suite", img: "https://images.unsplash.com/photo-1541123437800-141315fc38c0", desc: "Executive desk · Priority Wi-Fi · Conference access.", cap: 3, price: 1 },
-            { name: "Classic Economy Room", img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", desc: "Cozy space for budget travelers. Free Wi-Fi.", cap: 1, price: 1 }
+            { name: "Deluxe Queen Suite", img: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c", desc: "1 comfortable bed. Ideal for solo luxury. Free breakfast · Free Wi-Fi.", cap: 1, price: 1 },
+            { name: "Executive Family Room", img: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461", desc: "Premium single occupancy room with desk. Free Wi-Fi.", cap: 1, price: 1 },
+            { name: "King Ocean View", img: "https://images.unsplash.com/photo-1618773928120-d3c5fcc655eb", desc: "Stunning ocean views for the solo traveler. Free breakfast.", cap: 1, price: 1 },
+            { name: "Master Honeymoon Suite", img: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b", desc: "Luxury suite for one. Romantic decor · Free champagne.", cap: 1, price: 1 },
+            { name: "Presidential Business Suite", img: "https://images.unsplash.com/photo-1541123437800-141315fc38c0", desc: "Executive solo desk · Priority Wi-Fi · Conference access.", cap: 1, price: 1 },
+            { name: "Classic Economy Room", img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", desc: "Efficient space for budget solo travelers. Free Wi-Fi.", cap: 1, price: 1 }
         ];
 
         const FOODS = [
@@ -589,21 +584,23 @@
 
             // 1. Ask Google Firestore for all bookings overlapping our requested dates
             let bookedRooms = new Set();
+            let bDocs = [];
             if(typeof db !== 'undefined') {
                 try {
                     const snap = await db.collection('bookings').get();
                     snap.forEach(doc => {
                         const data = doc.data();
+                        bDocs.push(data);
                         if(data.roomType && data.checkin && data.checkout) {
                             const bIn = new Date(data.checkin);
                             const bOut = new Date(data.checkout);
                             
-                            // Real-time Policy: Reset at 12:00 PM (Includes 1-hour cleaning buffer)
+                            // Real-time Policy: Reset at 11:00 AM
                             const now = new Date();
                             const checkoutDay = new Date(bOut);
-                            checkoutDay.setHours(12, 0, 0, 0); // Force 12 PM on checkout day
+                            checkoutDay.setHours(11, 0, 0, 0); // Force 11 AM on checkout day
 
-                            // If we are currently past 12 PM ON the checkout day, this booking is no longer a blocker
+                            // If we are currently past 11 AM ON the checkout day, this booking is no longer a blocker
                             const isPastReset = (now > checkoutDay);
 
                             if (!isPastReset) {
@@ -629,6 +626,23 @@
                 validRooms.forEach(room => {
                     const isBooked = bookedRooms.has(room.name);
                     
+                    // --- Countdown Logic ---
+                    let countdownHTML = '';
+                    if (isBooked) {
+                        // Find the booking that caused the overlap
+                        const overlappingBooking = bDocs.find(b => b.roomType === room.name && (new Date(reqCheckin) < new Date(b.checkout)));
+                        if (overlappingBooking) {
+                            const bOut = new Date(overlappingBooking.checkout);
+                            bOut.setHours(11, 0, 0, 0);
+                            const diff = bOut.getTime() - now.getTime();
+                            if (diff > 0) {
+                                const hours = Math.floor(diff / (1000 * 60 * 60));
+                                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                countdownHTML = `<span style="background: rgba(255,255,255,0.9); color: var(--hotel-primary); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; position: absolute; top: 10px; left: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">⏳ ${hours}h ${mins}m until checkout</span>`;
+                            }
+                        }
+                    }
+                    
                     // High-quality Status Badges
                     const availabilityBadge = isBooked 
                         ? `<span style="background: #fee2e2; color: #dc2626; border: 1px solid #f87171; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; margin-bottom: 15px; display: inline-block;">🚨 ALREADY BOOKED</span>`
@@ -642,7 +656,10 @@
 
                     roomsContainer.innerHTML += `
                         <div class="card" style="${styleMod}">
-                            <img src="${room.img}?auto=format&fit=crop&q=80" alt="${room.name}">
+                            <div style="position: relative;">
+                                <img src="${room.img}?auto=format&fit=crop&q=80" alt="${room.name}">
+                                ${countdownHTML}
+                            </div>
                             <div class="card-content">
                                 <h3>${room.name}</h3>
                                 ${availabilityBadge}
