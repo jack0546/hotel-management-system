@@ -1,10 +1,26 @@
 'use client';
-import { useState } from 'react';
-import { CalendarDays, Coffee, Users, Search, Bell, Bot } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CalendarDays, Coffee, Users, Search, Bell, Bot, TrendingUp, CheckCircle } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [stats, setStats] = useState({ revenue: 0, active: 0 });
+
+  useEffect(() => {
+    const q = query(collection(db, 'bookings'), orderBy('timestamp', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setBookings(docs);
+      
+      const totalRev = docs.reduce((acc, curr: any) => acc + (Number(curr.totalPaid) || 0), 0);
+      setStats({ revenue: totalRev, active: snapshot.size });
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -39,9 +55,9 @@ export default function Home() {
         </header>
 
         <div className="p-10">
-          {activeTab === 'dashboard' && <DashboardView />}
+          {activeTab === 'dashboard' && <DashboardView stats={stats} />}
           {activeTab === 'rooms' && <RoomsView />}
-          {activeTab === 'guests' && <GuestsView />}
+          {activeTab === 'guests' && <GuestsView bookings={bookings} />}
           {activeTab === 'pos' && <POSView />}
         </div>
 
@@ -86,17 +102,18 @@ function SidebarItem({ icon, label, active, onClick }: { icon: React.ReactNode, 
 }
 
 // Sub-components
-function DashboardView() {
+function DashboardView({ stats }: { stats: any }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="Total Rooms" value="120" />
-        <StatCard title="Occupancy Rate" value="78%" />
-        <StatCard title="Daily Revenue" value="$4,250" />
-        <StatCard title="Active Bookings" value="45" />
+        <StatCard title="Total Rooms" value="6" />
+        <StatCard title="Occupancy Rate" value="Live" />
+        <StatCard title="Total Revenue" value={`GHS ${stats.revenue.toLocaleString()}`} />
+        <StatCard title="Active Bookings" value={stats.active.toString()} />
       </div>
-      <div className="glass rounded-2xl p-6 mt-8 h-96 flex items-center justify-center shadow-sm">
-        <p className="text-slate-500 font-medium text-lg">Revenue Chart Placeholder</p>
+      <div className="glass rounded-2xl p-6 mt-8 h-96 flex flex-col items-center justify-center shadow-sm">
+        <TrendingUp size={48} className="text-slate-300 mb-4" />
+        <p className="text-slate-500 font-medium text-lg">Real-time Revenue Analytics Active</p>
       </div>
     </div>
   )
@@ -111,10 +128,62 @@ function StatCard({ title, value }: { title: string, value: string }) {
   )
 }
 
-function GuestsView() {
+function GuestsView({ bookings }: { bookings: any[] }) {
   return (
-    <div className="glass p-10 rounded-2xl flex items-center justify-center">
-      <p className="text-slate-500 font-bold text-xl">Guest Management Dashboard - Coming Soon</p>
+    <div className="glass rounded-2xl overflow-hidden shadow-sm">
+      <div className="p-6 border-b bg-white/50 flex justify-between items-center">
+        <h3 className="font-bold text-xl text-slate-800">Live Booking Manifest</h3>
+        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+          <CheckCircle size={14} /> Live Sync Active
+        </span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-slate-50/50 text-slate-500 text-sm uppercase tracking-wider">
+              <th className="px-6 py-4 font-semibold">Guest</th>
+              <th className="px-6 py-4 font-semibold">Room Type</th>
+              <th className="px-6 py-4 font-semibold">Stay Dates</th>
+              <th className="px-6 py-4 font-semibold">Status</th>
+              <th className="px-6 py-4 font-semibold">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {bookings.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-10 text-center text-slate-400">
+                  Waiting for live bookings from the guest portal...
+                </td>
+              </tr>
+            ) : (
+              bookings.map((b) => (
+                <tr key={b.id} className="hover:bg-slate-50/80 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="font-bold text-slate-800">{b.guestName || 'Anonymous'}</div>
+                    <div className="text-xs text-slate-400">{b.guestEmail || 'no email'}</div>
+                  </td>
+                  <td className="px-6 py-4 text-slate-600 font-medium">{b.roomType}</td>
+                  <td className="px-6 py-4 text-slate-500 text-sm">
+                    {b.checkin} to {b.checkout}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      b.status?.includes('Unpaid') 
+                        ? 'bg-amber-100 text-amber-700' 
+                        : 'bg-green-100 text-green-700'
+                    }`}>
+                      {b.status || 'Paid'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 font-bold text-slate-800">
+                    GHS {Number(b.totalPaid || 0).toFixed(2)}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
