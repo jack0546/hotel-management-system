@@ -29,7 +29,7 @@ export default function Home() {
       const activeBookings = docs.filter((b: any) => {
         const bIn = new Date(b.checkin);
         const bOut = new Date(b.checkout);
-        bOut.setHours(11, 0, 0, 0); // Strictly 11 AM reset
+        bOut.setHours(12, 0, 0, 0); // Strictly 12 PM reset
         return currentTime >= bIn && currentTime < bOut;
       });
 

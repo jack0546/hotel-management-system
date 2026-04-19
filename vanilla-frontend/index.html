@@ -231,11 +231,11 @@
     <div id="tab-rooms" class="tab-content">
         <div class="booking-widget">
             <div class="input-group">
-                <label>Check In (12:00 pm)</label>
+                <label>Check In (2:00 pm)</label>
                 <input type="date" id="checkin">
             </div>
             <div class="input-group">
-                <label>Check Out (11:00 am)</label>
+                <label>Check Out (12:00 pm)</label>
                 <input type="date" id="checkout">
             </div>
             <div class="input-group">
@@ -325,13 +325,13 @@
     <div id="tab-contact" class="tab-content section-container">
         <h2>Contact Us</h2>
         <div style="background: rgba(255,255,255,0.9); padding: 40px; border-radius: 20px; text-align: left; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); backdrop-filter: blur(10px);">
-            <p style="font-size: 18px; margin-bottom: 15px;"><strong>📍 Address:</strong> Two Streams - Mangoase Junction, Koforidua (3Q64+52)</p>
-            <p style="font-size: 18px; margin-bottom: 15px;"><strong>📞 Phone:</strong> 059 918 1742</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>📍 Address:</strong> 3PQM+W89, Koforidua</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>📞 Phone:</strong> 020 231 6102</p>
             <p style="font-size: 18px; margin-bottom: 15px;"><strong>✉️ Email:</strong> reservations@safegoldhotel.com</p>
             <p style="font-size: 18px; margin-bottom: 15px;"><strong>🌐 Website:</strong> www.safegoldhotel.com</p>
             <div style="margin-top: 30px; text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
                 <button class="book-btn" style="flex: 1; min-width: 200px;" onclick="window.location.href='mailto:reservations@safegoldhotel.com'">Send an Email</button>
-                <button class="book-btn" style="flex: 1; min-width: 200px; background: #25D366; border: none; box-shadow: 0 5px 15px rgba(37,211,102,0.4);" onclick="window.open('https://wa.me/233599181742?text=Hello%20Safegold%20Hotel!%20I%20want%20to%20make%20an%20inquiry.', '_blank')">
+                <button class="book-btn" style="flex: 1; min-width: 200px; background: #25D366; border: none; box-shadow: 0 5px 15px rgba(37,211,102,0.4);" onclick="window.open('https://wa.me/233202316102?text=Hello%20Safegold%20Hotel!%20I%20want%20to%20make%20an%20inquiry.', '_blank')">
                     <ion-icon name="logo-whatsapp" style="vertical-align: middle; font-size: 20px; margin-right: 5px;"></ion-icon> WhatsApp Us
                 </button>
             </div>
@@ -339,7 +339,7 @@
     </div>
 
     <!-- FLOATING WHATSAPP ICON -->
-    <a href="https://wa.me/233599181742?text=Hello%20Safegold%20Hotel!%20I%20want%20to%20make%20an%20inquiry." class="floating-wa" target="_blank" title="Chat with us on WhatsApp">
+    <a href="https://wa.me/233202316102?text=Hello%20Safegold%20Hotel!%20I%20want%20to%20make%20an%20inquiry." class="floating-wa" target="_blank" title="Chat with us on WhatsApp">
         <ion-icon name="logo-whatsapp"></ion-icon>
     </a>
 
@@ -497,9 +497,9 @@
     <!-- MAIN FOOTER WITH INFO -->
     <footer class="hotel-footer">
         <h2>Safegold Hotel</h2>
-        <p>Two Streams - Mangoase Junction, Koforidua (3Q64+52)</p>
-        <p>📞 059 918 1742 | 🌐 safegoldhotel.com</p>
-        <p style="margin-top: 15px; font-weight: bold; color: var(--hotel-primary);">Check-in time: 12:00 pm | Check-out time: 11:00 am</p>
+        <p>3PQM+W89, Koforidua</p>
+        <p>📞 020 231 6102 | 🌐 safegoldhotel.com</p>
+        <p style="margin-top: 15px; font-weight: bold; color: var(--hotel-primary);">Check-in time: 2:00 pm | Check-out time: 12:00 pm</p>
     </footer>
 
     <script>
@@ -743,11 +743,11 @@
                             const bIn = new Date(data.checkin);
                             const bOut = new Date(data.checkout);
                             
-                            // Real-time Policy: Reset at 11:00 AM
+                            // Real-time Policy: Reset at 12:00 PM
                             const checkoutDay = new Date(bOut);
-                            checkoutDay.setHours(11, 0, 0, 0); // Force 11 AM on checkout day
+                            checkoutDay.setHours(12, 0, 0, 0); // Force 12 PM on checkout day
 
-                            // If we are currently past 11 AM ON the checkout day, this booking is no longer a blocker
+                            // If we are currently past 12 PM ON the checkout day, this booking is no longer a blocker
                             const isPastReset = (now > checkoutDay);
 
                             if (!isPastReset) {
@@ -780,7 +780,7 @@
                         const overlappingBooking = bDocs.find(b => b.roomType === room.name && (new Date(reqCheckin) < new Date(b.checkout)));
                         if (overlappingBooking) {
                             const bOut = new Date(overlappingBooking.checkout);
-                            bOut.setHours(11, 0, 0, 0);
+                            bOut.setHours(12, 0, 0, 0);
                             const diff = bOut.getTime() - now.getTime();
                             if (diff > 0) {
                                 const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -963,7 +963,7 @@
             doc.setFontSize(10);
             doc.setTextColor(148, 163, 184);
             doc.text("If you chose to reserve without payment, please bring this reference to the front desk.", 20, 260);
-            doc.text("Note: Checkout time is fixed at 11:00 AM on your final day of stay.", 20, 270);
+            doc.text("Note: Checkout time is fixed at 12:00 PM on your final day of stay.", 20, 270);
             doc.text("Thank you for choosing Safegold Hotel! We look forward to your arrival.", 20, 280);
 
             let pdfName = isReservation ? `Safegold_Reservation_${transactionRef}.pdf` : `Safegold_Receipt_${transactionRef}.pdf`;
@@ -997,7 +997,7 @@
 
             if (!isReservation) {
                 const msg = `🚨 NEW PAYMENT RECEIVED - Safegold Hotel\n\nGuest: ${guestName}\nRoom: ${bookingState.roomName}\nTotal Paid: GHS ${bookingState.total.toFixed(2)}\nDates: ${bookingState.checkinDate} to ${bookingState.checkoutDate}\nRef: ${transactionRef}`;
-                const waUrl = `https://wa.me/233599181742?text=${encodeURIComponent(msg)}`;
+                const waUrl = `https://wa.me/233202316102?text=${encodeURIComponent(msg)}`;
                 setTimeout(() => { window.open(waUrl, '_blank'); }, 2000);
             }
 
@@ -1182,7 +1182,7 @@
 
             if (!isChargedToRoom) {
                 const msg = `🍔 NEW FOOD/DRINK ORDER - Safegold Hotel\n\nCustomer: ${guestName}\nOrder: ${itemState.qty}x ${itemState.itemName}\nLocation: ${roomLocation}\nTotal Paid: GHS ${itemState.total.toFixed(2)}\nRef: ${transactionRef}`;
-                const waUrl = `https://wa.me/233599181742?text=${encodeURIComponent(msg)}`;
+                const waUrl = `https://wa.me/233202316102?text=${encodeURIComponent(msg)}`;
                 setTimeout(() => { window.open(waUrl, '_blank'); }, 2000);
             }
             
