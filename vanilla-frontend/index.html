@@ -1120,22 +1120,10 @@
                         const data = doc.data();
                         bDocs.push(data);
                         if(data.roomType && data.checkin && data.checkout) {
-                            const bIn = new Date(data.checkin);
-                            const bOut = new Date(data.checkout);
-         @media (max-width: 768px) {
-             .top-nav { padding: 10px 12px; gap: 6px; }
-             .logo-row { gap: 8px; }
-             .top-nav .logo { font-size: 16px; }
-             .top-nav .logo img { height: 30px; width: 30px; }
-             #mobile-menu-btn { font-size: 24px; }
-             .top-nav .nav-links { gap: 10px; }
-             .nav-link { font-size: 13px; }
-             .nav-btn { padding: 5px 12px; font-size: 12px; border-radius: 12px; }
-             .tab-btn { font-size: 12px; padding: 4px 8px; }
-             .hero h1 { font-size: 28px; margin-top: 30px; }
-             .hero p { font-size: 13px; }
-         }
-                            // Real-time Policy: Reset at 12:00 PM
+                             const bIn = new Date(data.checkin);
+                             const bOut = new Date(data.checkout);
+                             
+                             // Real-time Policy: Reset at 12:00 PM
                             const checkoutDay = new Date(bOut);
                             checkoutDay.setHours(12, 0, 0, 0); // Force 12 PM on checkout day
 
