@@ -1116,28 +1116,19 @@
                 roomsContainer.innerHTML = '<h3 style="grid-column: 1/-1; text-align: center; color: var(--hotel-primary);">Loading rooms...</h3>';
                 if (results) results.classList.remove('hidden');
 
-                // Fetch bookings from Firestore to determine room availability
-                let bookedRooms = new Set();
-                let bDocs = [];
+                // Fetch all bookings from Firestore
+                let allBookings = [];
                 if (typeof db !== 'undefined') {
                     try {
                         const snap = await db.collection('bookings').get();
                         snap.forEach(doc => {
                             const data = doc.data();
-                            bDocs.push(data);
                             if (data.roomType && data.checkin && data.checkout) {
-                                const bIn = new Date(data.checkin);
-                                const bOut = new Date(data.checkout);
-                                // Reset checkout at 12 PM
-                                const checkoutDay = new Date(bOut);
-                                checkoutDay.setHours(12, 0, 0, 0);
-                                const isPastReset = (now > checkoutDay);
-                                if (!isPastReset) {
-                                    // Check date overlap: if requested checkin before booking checkout AND requested checkout after booking checkin
-                                    if (reqCheckin < bOut && reqCheckout > bIn) {
-                                        bookedRooms.add(data.roomType);
-                                    }
-                                }
+                                allBookings.push({
+                                    roomType: data.roomType,
+                                    checkin: new Date(data.checkin),
+                                    checkout: new Date(data.checkout)
+                                });
                             }
                         });
                     } catch (e) {
@@ -1145,45 +1136,55 @@
                     }
                 }
 
-                // Render all rooms (including booked)
+                // Render all rooms
                 const allRooms = RAW_ROOMS;
-                roomsContainer.innerHTML = ''; // Clear loading message
+                roomsContainer.innerHTML = '';
                 
+                // Calculate which rooms are truly booked for the requested dates (only if checkout time hasn't passed)
                 allRooms.forEach(room => {
-                    const isBooked = bookedRooms.has(room.name);
+                    // Find overlapping bookings for this room
+                    const overlappingBookings = allBookings.filter(b => b.roomType === room.name && reqCheckin < b.checkout && reqCheckout > b.checkin);
+                    
+                    // Check if any overlapping booking is still active (checkout time not yet passed at 12 PM)
+                    // Hotel policy: checkout is at 12:00 PM on the checkout day
+                    const activeBooking = overlappingBookings.find(b => {
+                        const checkoutReset = new Date(b.checkout);
+                        checkoutReset.setHours(12, 0, 0, 0); // 12 PM on checkout day
+                        return now < checkoutReset; // Still active if current time is before 12 PM checkout
+                    });
+                    
+                    const isBooked = activeBooking !== undefined;
                     
                     // Capacity warning
                     const capacityWarning = (requestedGuests > room.cap)
                         ? `<span style="background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-bottom: 5px; display: inline-block;">⚠️ Capacity Exceeded</span>`
                         : '';
                     
-                    // Countdown timer for booked rooms
+                    // Countdown timer (only if booked and checkout hasn't happened)
                     let countdownHTML = '';
-                    if (isBooked) {
-                        const overlappingBooking = bDocs.find(b => b.roomType === room.name && (reqCheckin < new Date(b.checkout)));
-                        if (overlappingBooking) {
-                            const bOutDate = new Date(overlappingBooking.checkout);
-                            bOutDate.setHours(12, 0, 0, 0);
-                            const diff = bOutDate.getTime() - now.getTime();
-                            if (diff > 0) {
-                                const hours = Math.floor(diff / (1000 * 60 * 60));
-                                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                countdownHTML = `<span style="background: rgba(255,255,255,0.9); color: var(--hotel-primary); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; position: absolute; top: 10px; left: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">⏳ ${hours}h ${mins}m until checkout</span>`;
-                            }
+                    if (isBooked && activeBooking) {
+                        const checkoutTime = new Date(activeBooking.checkout);
+                        checkoutTime.setHours(12, 0, 0, 0);
+                        const diff = checkoutTime.getTime() - now.getTime();
+                        if (diff > 0) {
+                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            countdownHTML = `<span style="background: rgba(255,255,255,0.9); color: var(--hotel-primary); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; position: absolute; top: 10px; left: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">⏳ ${hours}h ${mins}m until checkout</span>`;
                         }
                     }
                     
-                    // Status badge
-                    const availabilityBadge = isBooked
-                        ? `<span style="background: #fee2e2; color: #dc2626; border: 1px solid #f87171; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; margin-bottom: 15px; display: inline-block;">🚨 ALREADY BOOKED</span>`
+                    // Status badge: BOOKED only if countdown > 0, else AVAILABLE
+                    const isTrulyBooked = countdownHTML !== ''; // Only show booked if countdown is active
+                    const availabilityBadge = isTrulyBooked
+                        ? `<span style="background: #fee2e2; color: #dc2626; border: 1px solid #f87171; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; margin-bottom: 15px; display: inline-block;">🚨 BOOKED</span>`
                         : `<span style="background: #dcfce7; color: #16a34a; border: 1px solid #4ade80; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; margin-bottom: 15px; display: inline-block;">✅ AVAILABLE</span>`;
                     
                     // Book button
-                    const buttonHTML = isBooked
+                    const buttonHTML = isTrulyBooked
                         ? `<button class="action-btn" style="background: #94a3b8; cursor: not-allowed;" title="Dates Overlapped" disabled>Unavailable for Dates</button>`
                         : `<button class="action-btn" onclick="openBookingModal('${room.name}', ${room.price})">Book This Room</button>`;
                     
-                    const styleMod = isBooked ? `opacity: 0.75; filter: grayscale(30%);` : ``;
+                    const styleMod = isTrulyBooked ? `opacity: 0.75; filter: grayscale(30%);` : ``;
                     
                     roomsContainer.innerHTML += `
                         <div class="card" style="${styleMod}">
@@ -1204,9 +1205,19 @@
                     `;
                 });
                 
-                // Also show a summary of booked room names above the grid
-                if (bookedRooms.size > 0) {
-                    const bookedNames = allRooms.filter(r => bookedRooms.has(r.name)).map(r => r.name);
+                // Show summary of truly booked rooms (with active countdown)
+                const currentlyBooked = allRooms.filter(r => {
+                    const overlappingBookings = allBookings.filter(b => b.roomType === r.name && reqCheckin < b.checkout && reqCheckout > b.checkin);
+                    const activeBooking = overlappingBookings.find(b => {
+                        const checkoutReset = new Date(b.checkout);
+                        checkoutReset.setHours(12, 0, 0, 0);
+                        return now < checkoutReset;
+                    });
+                    return activeBooking !== undefined;
+                });
+                
+                if (currentlyBooked.length > 0) {
+                    const bookedNames = currentlyBooked.map(r => r.name);
                     const summaryHTML = `
                         <div style="grid-column: 1/-1; background: linear-gradient(90deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #f87171; padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; color: #991b1b; font-weight: 600; display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: 18px;">⚠️</span>
