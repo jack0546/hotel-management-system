@@ -1097,7 +1097,32 @@
             }
         }
 
+        // --- LIVE COUNTDOWN UPDATE ---
+        function updateLiveCountdowns() {
+            const now = new Date();
+            let needsRefresh = false;
+            document.querySelectorAll('.live-countdown').forEach(el => {
+                const checkoutTime = parseInt(el.dataset.checkout);
+                if (checkoutTime) {
+                    const diff = checkoutTime - now.getTime();
+                    if (diff > 0) {
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        el.textContent = `⏳ ${hours}h ${mins}m until checkout`;
+                    } else {
+                        el.textContent = '';
+                        needsRefresh = true;
+                    }
+                }
+            });
+            if (needsRefresh) executeSearch();
+        }
+        
+        setInterval(updateLiveCountdowns, 1000);
+
         // --- ENHANCED LIVE AVAILABILITY SEARCH LOGIC ---
+        let searchInterval = null;
+        
         async function executeSearch() {
             try {
                 const now = new Date();
@@ -1169,7 +1194,7 @@
                         if (diff > 0) {
                             const hours = Math.floor(diff / (1000 * 60 * 60));
                             const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                            countdownHTML = `<span style="background: rgba(255,255,255,0.9); color: var(--hotel-primary); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; position: absolute; top: 10px; left: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">⏳ ${hours}h ${mins}m until checkout</span>`;
+                            countdownHTML = `<span class="live-countdown" data-checkout="${checkoutTime.getTime()}" style="background: rgba(255,255,255,0.9); color: var(--hotel-primary); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; position: absolute; top: 10px; left: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">⏳ ${hours}h ${mins}m until checkout</span>`;
                         }
                     }
                     
@@ -1234,6 +1259,10 @@
                     roomsContainer.innerHTML = '<h3 style="grid-column: 1/-1; text-align: center; color: #dc2626;">Error loading rooms. Please try again.</h3>';
                 }
             }
+            
+            // Auto-refresh countdown every 10 seconds
+            if (searchInterval) clearInterval(searchInterval);
+            searchInterval = setInterval(executeSearch, 10000);
         }
         // --- PWA INSTALLATION LOGIC (Floating Button Always Visible) ---
         let deferredPrompt;
