@@ -32,8 +32,11 @@ router.post('/', async (req, res) => {
     // Update room status
     await Room.findByIdAndUpdate(room, { status: 'Reserved' });
 
-    // Send WhatsApp notification
+    // Send WhatsApp notification to guest
     await sendWhatsAppNotification(req.body.userPhone, `Hello, your booking for Room is confirmed! Check-in: ${checkInDate}`);
+
+    // Send WhatsApp notification to owner
+    await sendWhatsAppNotification('+233532340875', `🚨 NEW BOOKING - Safegold Hotel\n\nGuest: ${req.body.userName || 'N/A'}\nRoom: ${req.body.roomType || 'N/A'}\nPhone: ${req.body.userPhone}\nDates: ${checkInDate} to ${checkOutDate}\nTotal: GHS ${totalAmount}`);
 
     res.json(booking);
   } catch (err) {
