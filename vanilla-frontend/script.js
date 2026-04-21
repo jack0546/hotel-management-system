@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         roomsContainer.innerHTML += `
             <div class="room-card">
-                <div class="room-img" style="background-image: url('https://images.unsplash.com/photo-1542314831-c6a4d27ce66f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60')">
+                <div class="room-img" style="background-image: url('https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60')">
                     <div class="room-overlay">
                         <span>Room 10${i}</span>
                     </div>
